@@ -1,33 +1,27 @@
 odoo.define('pos_loyalty_refund.ReceiptScreen', function (require) {
     'use strict';
 
-    const Registries = require('point_of_sale.Registries');
 
     const ReceiptScreen = require('point_of_sale.ReceiptScreen');
+    const Registries = require('point_of_sale.Registries');
 
     const GiftReceiptScreen = ReceiptScreen => class extends ReceiptScreen {
-        constructor() {
-            super(...arguments);
+        setup() {
+            super.setup();
             this.orderUiState.printGift = false;
-    
-        }
-        async mounted() {
-            super.mounted();
-            
+            this.orderUiState.printMessage = "Print Gift Receipt";
+            this.orderUiState.printClass = "fa fa-gift";
 
         }
         changePrintGift(ev) {
-            this.render();
-        }
-        get hasgift() {
-            let orderlines = this.currentOrder.get_orderlines();
-            let giftline = this.currentOrder
-                .get_orderlines()
-                .find((line) => line.gift_card_id);
-            return (giftline) ? true : false
+            this.orderUiState.printGift = !this.orderUiState.printGift;
+            this.orderUiState.printMessage = this.orderUiState.printGift ? "Print Normal Receipt": "Print Gift Receipt";
+            this.orderUiState.printClass = this.orderUiState.printGift ? "fa fa-print": "fa fa-gift";
+            setTimeout(() => {
+                this.printReceipt();
+            }, 50);
         }
     }
-
 
     Registries.Component.extend(ReceiptScreen, GiftReceiptScreen);
 

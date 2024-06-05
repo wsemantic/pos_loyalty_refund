@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates id="template" xml:space="preserve">
+
     <t t-name="OrderReceipt" t-inherit="point_of_sale.OrderReceipt" t-inherit-mode="extension" owl="1">
         <xpath expr="//t[@t-if='!isTaxIncluded']" position="replace">
             <t t-if="!isTaxIncluded">
@@ -17,6 +18,7 @@
                 </t>
             </t>
         </xpath>
+        
         <xpath expr="//div[@class='pos-receipt-right-align']/following-sibling::div[@class='pos-receipt-amount']" position="replace">
             <div t-if="!props.printasgift" class="pos-receipt-amount">
                 TOTAL 
@@ -36,7 +38,6 @@
                 </div>
             </t>
         </xpath>
-
 
         <xpath expr="//div[hasclass('receipt-change')]" position="replace">
             <div t-if="!props.printasgift" class="pos-receipt-amount receipt-change">
@@ -70,7 +71,6 @@
 
         </xpath>
 
-
         <xpath expr="//t[@t-foreach='receipt.paymentlines']" position="replace">
             <t t-foreach="receipt.paymentlines" t-as="line" t-key="line.cid">
                 <div t-if="!props.printasgift">
@@ -90,6 +90,7 @@
             </div>
         </xpath>
     </t>
+    
     <t t-name="OrderLinesReceipt" t-inherit="point_of_sale.OrderLinesReceipt" t-inherit-mode="extension" owl="1">
         <xpath expr="//t[@t-foreach='receipt.orderlines']" position="replace">
             <t t-foreach="receipt.orderlines" t-as="line" t-key="line.id">

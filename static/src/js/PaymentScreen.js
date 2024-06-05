@@ -3,36 +3,32 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
 
     const PaymentScreen = require('point_of_sale.PaymentScreen');
     const Registries = require('point_of_sale.Registries');
-    var core = require('web.core');
-    var _t = core._t;
 
-
-    const CustomPosGiftCardPaymentScreen = PaymentScreen => class extends PaymentScreen {
-
-
-        async _postPushOrderResolve(order, server_ids) {
-            if (this.env.pos.config.use_gift_card) {
-				let orderlines=order.get_orderlines();
-				if(orderlines !==null){
-					let giftline = orderlines.find((line) => line.gift_card_id);
-						
-					if( typeof giftline !== "undefined" && giftline !== null && giftline.gift_card_id !==null){
-						let giftCard = await this.rpc({
-							model: "gift.card",
-							method: "search_read",
-							args: [[['id', '=', giftline.gift_card_id]]],
-						});
-						if (giftCard.length) {
-							order.giftCard = giftCard[0];
-						}
-					}
-				}
+    const session = require('web.session');
+    
+    const PosGCPaymentScreen = PaymentScreen => class extends PaymentScreen {
+        async _postPushOrderResolve(order, order_server_ids) {
+            const res = await super._postPushOrderResolve(...arguments);
+            let result = await this.rpc({
+                model: 'pos.order',
+                method: 'get_giftcard_lines',
+                args: [order_server_ids],
+                kwargs: { context: session.user_context },
+            });
+            if (Object.keys(result.updated_lines).length){
+                for (const line of order.get_orderlines()) {
+                    if(this.env.pos.config.gift_card_product_id[0] == line.product.id) {
+                        const gclines = Object.values(result.updated_lines).filter((value) => value.price === line.price);
+                        line.gift_card_code = gclines[0].gift_card_code
+                        line.gift_card_balance = gclines[0].gift_card_balance
+                    }
+                }
             }
-            return super._postPushOrderResolve(order, server_ids);
+            return res;
         }
     };
 
-    Registries.Component.extend(PaymentScreen, CustomPosGiftCardPaymentScreen);
+    Registries.Component.extend(PaymentScreen, PosGCPaymentScreen);
 
-    return CustomPosGiftCardPaymentScreen;
+    return PosGCPaymentScreen;
 });

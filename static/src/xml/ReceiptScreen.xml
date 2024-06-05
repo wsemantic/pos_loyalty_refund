@@ -1,14 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates id="template" xml:space="preserve">
+
+    <t t-name="OrderLinesReceipt" t-inherit="point_of_sale.OrderLinesReceipt" t-inherit-mode="extension" owl="1">
+        <xpath expr="//t[@t-foreach='receipt.orderlines']" position="inside">
+            <t t-if="line.gift_card_code">
+                <div class="coupon-container">
+                    <div style="max-width: 150px">
+                        <img t-att-src="'/report/barcode/Code128/'+line.gift_card_code+'?width=800&amp;height=200&amp;quiet=0'" style="width:150px;height:25px" alt="Barcode"/>
+                        <div style="text-align: center">
+                            <t t-esc="line.gift_card_code"/>
+                        </div>
+                        <div style="text-align: center">
+                            Balance: <t t-esc="env.pos.format_currency(line.gift_card_balance)"/>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </t>
+
     <t t-name="ReceiptScreen" t-inherit="point_of_sale.ReceiptScreen" t-inherit-mode="extension" owl="1">
         <xpath expr="//div[hasclass('buttons')]" position="before">
-            <div >
+            <!-- <div>
                 <label for="printgit">Ticket Regalo</label>
                 <input type="checkbox" id="printgit" t-model="orderUiState.printGift" t-on-change="changePrintGift"></input>
+            </div> -->
+            <div class="buttons">
+                <div class="button print" t-on-click="changePrintGift">
+                    <i t-att-class="orderUiState.printClass"></i>
+                    <span> </span>
+                    <span t-esc="orderUiState.printMessage"/>
+                </div>
             </div>
         </xpath>
         <xpath expr="//OrderReceipt[last()]" position="replace">
-            <OrderReceipt order="currentOrder" t-ref="order-receipt" printasgift="orderUiState.printGift" />
+            <OrderReceipt order="currentOrder" printasgift="orderUiState.printGift" />
         </xpath>
     </t>
 </templates>

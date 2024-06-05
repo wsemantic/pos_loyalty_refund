@@ -2,34 +2,28 @@
 
 {
     "name": "Custom POS Gift Card",
-    "version": "15.0.1.0.1",
+    "version": "16.0.1.0.1",
     "category": "Tools",
-    "author": "Imanis",
-    "website": "",
     "license": "AGPL-3",
     "summary": "Custom POS Gift Card",
     "depends": [
-        'base','pos_gift_card'
+        'pos_loyalty'
     ],
     "data":{
+        'data/sequence.xml',
         'data/gift_report.xml',
-        'data/sequence.xml'
+        'views/res_config_settings_view.xml'
     },
-    "assets":{
+     "assets":{
         'point_of_sale.assets': [
-            'pos_loyalty_refund/static/src/js/models.js',
-            'pos_loyalty_refund/static/src/js/giftcard_button.js',
-            'pos_loyalty_refund/static/src/js/giftcardpopup.js',
+            'pos_loyalty_refund/static/src/js/GitftCardButton.js',
+            'pos_loyalty_refund/static/src/js/Orderline.js',
             'pos_loyalty_refund/static/src/js/PaymentScreen.js',
             'pos_loyalty_refund/static/src/js/ReceiptScreen.js',
-            'pos_loyalty_refund/static/src/js/OrderReceipt.js',
-            
-        ],
-        'web.assets_qweb':[
-            'pos_loyalty_refund/static/src/xml/ReceiptScreen.xml',
+            'pos_loyalty_refund/static/src/xml/GitftCardButton.xml',
             'pos_loyalty_refund/static/src/xml/OrderReceipt.xml',
-        ], 
-    },
-    
+            'pos_loyalty_refund/static/src/xml/ReceiptScreen.xml',
+        ]
+     },
     "installable": True,
 }

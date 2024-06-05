@@ -16,7 +16,8 @@
 			<field name="header_spacing">0</field>
 			<field name="dpi">90</field>
 		</record>
-        <record id="pos_gift_card.gift_card_report_pdf" model="ir.actions.report">
+		
+        <record id="loyalty.report_gift_card" model="ir.actions.report">
             <field name="paperformat_id" ref="pos_loyalty_refund.paperformat_posprinter" />
         </record>
 
