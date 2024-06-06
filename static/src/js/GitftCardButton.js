@@ -5,6 +5,7 @@ odoo.define('pos_loyalty_refund.GitftCardButton', function(require) {
     const ProductScreen = require('point_of_sale.ProductScreen')
     const { useListener } = require("@web/core/utils/hooks");
     const Registries = require('point_of_sale.Registries');
+    const AbstractReceiptScreen = require('point_of_sale.AbstractReceiptScreen');
 
 
     class GitftCardButton extends PosComponent {
@@ -70,4 +71,5 @@ odoo.define('pos_loyalty_refund.GitftCardButton', function(require) {
     Registries.Component.add(GitftCardButton);
 
     return GitftCardButton;
+
 });
