@@ -21,11 +21,7 @@
 
     <t t-name="ReceiptScreen" t-inherit="point_of_sale.ReceiptScreen" t-inherit-mode="extension" owl="1">
         <xpath expr="//div[hasclass('buttons')]" position="before">
-            <!-- <div>
-                <label for="printgit">Ticket Regalo</label>
-                <input type="checkbox" id="printgit" t-model="orderUiState.printGift" t-on-change="changePrintGift"></input>
-            </div> -->
-            <div class="buttons">
+            <div t-if="!props.receiptWithoutPrice" class="buttons">
                 <div class="button print" t-on-click="changePrintGift">
                     <i t-att-class="orderUiState.printClass"></i>
                     <span> </span>
@@ -34,7 +30,7 @@
             </div>
         </xpath>
         <xpath expr="//OrderReceipt[last()]" position="replace">
-            <OrderReceipt order="currentOrder" printasgift="orderUiState.printGift" />
+            <OrderReceipt order="currentOrder" printasgift="orderUiState.printGift || props.receiptWithoutPrice" />
         </xpath>
     </t>
 </templates>

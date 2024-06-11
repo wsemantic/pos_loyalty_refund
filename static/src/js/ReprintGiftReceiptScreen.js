@@ -33,8 +33,7 @@ odoo.define('pos_loyalty_refund.ReprintGiftReceiptScreen', function(require) {
         ReprintGiftReceiptScreen.template = 'ReprintGiftReceiptScreen';
         return ReprintGiftReceiptScreen;
     };
+    
     Registries.Component.addByExtending(ReprintGiftReceiptScreen, AbstractReceiptScreen);
-
     return ReprintGiftReceiptScreen;
-
 });

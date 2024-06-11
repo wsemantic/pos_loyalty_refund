@@ -28,6 +28,7 @@
             'pos_loyalty_refund/static/src/xml/ReprintGiftReceiptButton.xml',
             'pos_loyalty_refund/static/src/xml/ReprintGiftReceiptScreen.xml',
             'pos_loyalty_refund/static/src/xml/TicketScreen.xml',
+            'pos_loyalty_refund/static/src/xml/PaymentScreen.xml',
         ]
      },
     "installable": True,
