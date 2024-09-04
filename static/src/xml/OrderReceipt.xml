@@ -73,7 +73,7 @@
 
         <xpath expr="//t[@t-foreach='receipt.paymentlines']" position="replace">
             <t t-foreach="receipt.paymentlines" t-as="line" t-key="line.cid">
-                <div t-if="!props.printasgift">
+                <div ><!--</div>t-if="!props.printasgift">-->
                     <t t-esc="line.name" />
                     <span t-esc="env.pos.format_currency_no_symbol(line.amount)" class="pos-receipt-right-align" />
                 </div>
