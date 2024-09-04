@@ -11,7 +11,7 @@
                             <t t-esc="line.gift_card_code"/>
                         </div>
                         <div style="text-align: center">
-                            Balance: <t t-esc="env.pos.format_currency(line.gift_card_balance)"/>
+                            Saldo: <t t-esc="env.pos.format_currency(line.gift_card_balance)"/>
                         </div>
                     </div>
                 </div>

@@ -8,12 +8,12 @@
                     <span class="button back" t-on-click="confirm">
                         <i class="fa fa-angle-double-left"></i>
                         <span> </span>
-                        <span>Back</span>
+                        <span>Volver</span>
                     </span>
                 </div>
                 <div class="centered-content">
                     <div class="button print" t-on-click="tryReprint">
-                        <i class="fa fa-print"></i> Print Receipt
+                        <i class="fa fa-print"></i> Imprime Recibo
                     </div>
                     <div class="pos-receipt-container" t-ref="order-receipt">
                         <OrderReceipt order="props.order" printasgift="true"/>

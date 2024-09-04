@@ -4,7 +4,7 @@
     <t t-name="GitftCardButton" owl="1">
         <span class="control-button">
             <i class="fa fa-gift"></i>
-            <span>Gift Card</span>
+            <span>Tarjeta Regalo</span>
         </span>
     </t>
 

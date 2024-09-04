@@ -9,7 +9,7 @@
                 <div class="content-group" attrs="{'invisible': [('module_loyalty', '=', False)]}">
                     <div class="mt16 o_light_label">
                         <label for="gift_card_product_id" class="col-lg-4 o_light_label"/>
-                        <field name="gift_card_product_id" string="Gift Card Product" domain="[('sale_ok', '=', True), ('detailed_type', '=', 'service')]"/>
+                        <field name="gift_card_product_id" string="Tarjeta Regalo Producto" domain="[('sale_ok', '=', True), ('detailed_type', '=', 'service')]"/>
                     </div>
                 </div>
             </xpath>
