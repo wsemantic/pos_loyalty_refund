@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 {
-    "name": "Custom POS Gift Card",
+    "name": "WSEM Custom POS Gift Card",
     "version": "16.0.1.0.1",
     "category": "Tools",
     "license": "AGPL-3",
