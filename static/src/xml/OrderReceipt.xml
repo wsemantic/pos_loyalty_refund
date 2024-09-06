@@ -129,7 +129,7 @@
                         </div>
                     </t>
                     <div class="pos-receipt-left-padding">
-                        <t t-esc="Math.round(line.qty * Math.pow(10, env.pos.dp['Product Unit of Measure'])) / Math.pow(10, env.pos.dp['Product Unit of Measure'])" />
+                        <t t-esc="line.qty" />
                         <t t-if="!line.is_in_unit" t-esc="line.unit_name" />
                         x
                         <t t-if="!props.printasgift" t-esc="env.pos.format_currency_no_symbol(line.price_display_one)" />
