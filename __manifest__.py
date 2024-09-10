@@ -16,7 +16,7 @@
         
     },
     "assets": {
-        'web.assets_backend': [
+        'point_of_sale.assets': [
             'pos_loyalty_refund/static/src/scss/custom_receipt.scss',
         ],
     },
