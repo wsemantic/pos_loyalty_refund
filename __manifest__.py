@@ -16,7 +16,7 @@
         
     },
     "assets": {
-        'point_of_sale.assets': [
+        'web.assets_common': [
             'pos_loyalty_refund/static/src/css/custom_receipt.css',
         ],
     },
