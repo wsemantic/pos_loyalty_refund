@@ -12,7 +12,13 @@
     "data":{
         'data/sequence.xml',
         'data/gift_report.xml',
-        'views/res_config_settings_view.xml'
+        'views/res_config_settings_view.xml',
+        
+    },
+    "assets": {
+        'point_of_sale.assets': [
+            'pos_loyalty_refund/static/src/scss/custom_receipt.scss',
+        ],
     },
      "assets":{
         'point_of_sale.assets': [
