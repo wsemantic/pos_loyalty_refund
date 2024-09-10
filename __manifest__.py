@@ -15,11 +15,6 @@
         'views/res_config_settings_view.xml',
         
     },
-    "assets": {
-        'web.assets_common': [
-            'pos_loyalty_refund/static/src/css/custom_receipt.css',
-        ],
-    },
      "assets":{
         'point_of_sale.assets': [
             'pos_loyalty_refund/static/src/js/GitftCardButton.js',
@@ -35,6 +30,7 @@
             'pos_loyalty_refund/static/src/xml/ReprintGiftReceiptScreen.xml',
             'pos_loyalty_refund/static/src/xml/TicketScreen.xml',
             'pos_loyalty_refund/static/src/xml/PaymentScreen.xml',
+            'pos_loyalty_refund/static/src/scss/custom_receipt.scss',
         ]
      },
     "installable": True,
