@@ -17,7 +17,7 @@
     },
     "assets": {
         'point_of_sale.assets': [
-            'pos_loyalty_refund/static/src/scs/custom_receipt.css',
+            'pos_loyalty_refund/static/src/css/custom_receipt.css',
         ],
     },
      "assets":{
