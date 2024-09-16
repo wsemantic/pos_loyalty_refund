@@ -109,7 +109,7 @@ class PosOrder(models.Model):
     def get_giftcard_lines(self):
         return {
             'updated_lines': { line.id: {
-                'price': line.price_unit,
+                'price': line.price_subtotal,
                 'gift_card_id': line.gift_card_id.id,
                 'gift_card_code': line.gift_card_id.code,
                 'gift_card_balance': line.gift_card_id.points,
