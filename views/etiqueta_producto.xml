@@ -11,7 +11,7 @@
         <!-- Cambiar la clase del elemento del precio a 'o_label_price_medium' -->
         <xpath expr="//strong[contains(@class, 'o_label_price_small')]" position="attributes">
             <attribute name="class">o_label_price_medium</attribute>
-            <attribute name="style">font-size: 1.7em; margin-top: -5mm;</attribute>
+            <attribute name="style">font-size: 1.7em; margin-top: -5mm;display: inline-block;</attribute>
         </xpath>
     </template>
 	
