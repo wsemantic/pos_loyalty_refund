@@ -2,11 +2,8 @@
 <odoo>
     <template id="report_simple_label_dymo_custom" inherit_id="product.report_simple_label_dymo">
         <!-- Ajustar el tamaño del precio en la etiqueta Dymo -->
-        <!--<xpath expr="//div[@class='text-end']//strong" position="attributes">
+        <xpath expr="//div[@class='text-end']//strong" position="attributes">
             <attribute name="style">font-size: 24pt;</attribute>
-        </xpath>-->
-		<xpath expr="//div[@class='text-end']//strong" position="replace">
-            <strong style="font-size: 20pt; color: blue;">TEST PRICE</strong>
         </xpath>
     </template>
 </odoo>
