@@ -1,31 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-  <template id="report_simple_label_dymo_custom" inherit_id="product.report_simple_label_dymo">
-        <!-- Aplicar Flexbox al contenedor principal -->
+  
+   <template id="report_simple_label_dymo_custom" inherit_id="product.report_simple_label_dymo">
+        <!-- Añadir posicionamiento relativo y padding inferior al contenedor principal -->
         <xpath expr="//div[@class='o_label_full']" position="attributes">
             <attribute name="style">
-                display: flex;
-                flex-direction: column;
+                position: relative;
                 height: 100%;
+                padding-bottom: 5mm; <!-- Ajusta este valor según sea necesario -->
             </attribute>
         </xpath>
 
-        <!-- Ajustar el estilo del nombre del producto -->
-        <xpath expr="//div[@class='o_label_name']" position="attributes">
-            <attribute name="style">
-                /* Mantener estilos existentes */
-            </attribute>
-        </xpath>
-
-        <!-- Ajustar el contenedor del precio para que se fije en la parte inferior -->
+        <!-- Ajustar el contenedor del precio para posicionarlo absolutamente -->
         <xpath expr="//div[@class='text-end']" position="attributes">
             <attribute name="style">
+                position: absolute;
+                bottom: 0;
+                width: 100%;
                 padding: 0 4px;
-                margin-top: auto;
             </attribute>
         </xpath>
 
-        <!-- Ajustar el estilo del elemento del precio -->
+        <!-- Ajustar el tamaño de fuente del precio -->
         <xpath expr="//div[@class='text-end']//strong" position="attributes">
             <attribute name="style">font-size: 1.5em;</attribute>
         </xpath>
