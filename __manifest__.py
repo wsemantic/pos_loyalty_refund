@@ -13,7 +13,7 @@
         'data/sequence.xml',
         'data/gift_report.xml',
         'views/res_config_settings_view.xml',
-        
+        'views/etiqueta_producto.xml',        
     },
      "assets":{
         'point_of_sale.assets': [
