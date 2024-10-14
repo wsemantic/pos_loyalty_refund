@@ -28,7 +28,6 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 await this._waitFor(1000);
 
                 // Crear una nueva orden con los mismos productos para imprimir con precios
-														
                 const newOrder = this.env.pos.add_new_order();
                 
                 // Copiar los productos de la orden original a la nueva orden
@@ -48,14 +47,19 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 this.env.pos.set_order(newOrder);
 
                 // Validar e imprimir la nueva orden con precios
-											 
                 await this.validateOrderWithPrice(false);
 
                 // Restaurar la orden original como la orden actual
                 this.env.pos.set_order(originalOrder);
                 
-                // Eliminar la orden temporal
-                this.env.pos.remove_order(newOrder);
+                // Marcar la orden temporal como finalizada
+                newOrder.finalized = true;
+
+                // Limpiar la orden temporal del historial de órdenes si es posible
+                if (this.env.pos.db && typeof this.env.pos.db.remove_order === 'function') {
+                    this.env.pos.db.remove_order(newOrder.id);
+                }
+
             } catch (error) {
                 console.error("Error al imprimir ambos tickets:", error);
                 this.showPopup('ErrorPopup', {
@@ -133,33 +137,35 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
             try {
                 this.env.services.ui.block();
 
-                // 1. Guardar el pedido en el servidor.
-                syncOrderResult = await this.env.pos.push_single_order(this.currentOrder);
+                // Solo sincronizar si no es una orden temporal de impresión
+                if (!this.currentOrder.isTemporaryPrintOrder) {															   
+					// 1. Guardar el pedido en el servidor.
+					syncOrderResult = await this.env.pos.push_single_order(this.currentOrder);
 
-                // 2. Facturar.
-                if (this.shouldDownloadInvoice() && this.currentOrder.is_to_invoice()) {
-                    if (syncOrderResult.length) {
-                        await this.env.legacyActionManager.do_action(this.env.pos.invoiceReportAction, {
-                            additional_context: {
-                                active_ids: [syncOrderResult[0].account_move],
-                            },
-                        });
-                    } else {
-                        throw { code: 401, message: 'Backend Invoice', data: { order: this.currentOrder } };
-                    }
-                }
+					// 2. Facturar.
+					if (this.shouldDownloadInvoice() && this.currentOrder.is_to_invoice()) {
+						if (syncOrderResult.length) {
+							await this.env.legacyActionManager.do_action(this.env.pos.invoiceReportAction, {
+								additional_context: {
+									active_ids: [syncOrderResult[0].account_move],
+								},
+							});
+						} else {
+							throw { code: 401, message: 'Backend Invoice', data: { order: this.currentOrder } };
+						}
+					}
 
-                // 3. Post-procesar.
-                if (syncOrderResult.length && this.currentOrder.wait_for_push_order()) {
-                    const postPushResult = await this._postPushOrderResolve(
-                        this.currentOrder,
-                        syncOrderResult.map((res) => res.id)
-                    );
-                    if (!postPushResult) {
-                        this.showPopup('ErrorPopup', {
-                            title: this.env._t('Error: no internet connection.'),
-                            body: this.env._t('Some, if not all, post-processing after syncing order failed.'),
-                        });
+					// 3. Post-procesar.
+					if (syncOrderResult.length && this.currentOrder.wait_for_push_order()) {
+						const postPushResult = await this._postPushOrderResolve(
+							this.currentOrder,
+							syncOrderResult.map((res) => res.id)
+						);
+						if (!postPushResult) {
+							this.showPopup('ErrorPopup', {
+								title: this.env._t('Error: no internet connection.'),
+								body: this.env._t('Some, if not all, post-processing after syncing order failed.'),
+							});
                     }
                 }
             } catch (error) {
