@@ -12,7 +12,23 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
         setup() {
             super.setup();
             useListener('validate-order-without-price', () => this.validateOrderWithoutPrice(false));
+			useListener('print-both-tickets', () => this.printBothTickets());  // Añadimos un listener para el nuevo botón.																															 
             this.validateOrderWithoutPrice = useAsyncLockedMethod(this.validateOrderWithoutPrice);
+        }
+        async printBothTickets() {
+            try {
+                // Primero valida e imprime sin precios.
+                await this.validateOrderWithoutPrice(false);
+
+                // Luego valida e imprime con precios.
+                await this.validateOrder(false);
+            } catch (error) {
+                console.error("Error al imprimir ambos tickets:", error);
+                this.showPopup('ErrorPopup', {
+                    title: this.env._t('Error de impresión'),
+                    body: this.env._t('No se pudieron imprimir ambos tickets. Verifique la conexión o los parámetros de la configuración.'),
+                });
+            }
         }
         async validateOrderWithoutPrice(isForceValidate) {
             if(this.env.pos.config.cash_rounding) {
