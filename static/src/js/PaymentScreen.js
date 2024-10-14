@@ -51,11 +51,9 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 newOrder.isWithoutPrice = true;
                 newOrder.isTemporaryPrintOrder = true;
 
-                // Cambiar a la nueva orden
+                // Cambiar a la nueva orden y esperar a que el DOM esté listo
                 this.env.pos.set_order(newOrder);
-
-                // Esperar un momento para asegurar que la orden esté completamente activa
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await this._waitForOrderReady();
 
                 // Validar e imprimir la nueva orden sin precios
                 await this.validateOrderWithoutPrice(true);
@@ -63,14 +61,14 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
 
                 // Restaurar la orden original como la orden actual
                 this.env.pos.set_order(originalOrder);
+                await this._waitForOrderReady();
                 
-                // Marcar la orden temporal como finalizada
+                // Marcar la orden temporal como finalizada y eliminarla del POS
                 newOrder.finalized = true;
-
-                // Limpiar la orden temporal del historial de órdenes si es posible
                 if (this.env.pos.db && typeof this.env.pos.db.remove_order === 'function') {
                     this.env.pos.db.remove_order(newOrder.id);
                 }
+                this.env.pos.get_order_list().splice(this.env.pos.get_order_list().indexOf(newOrder), 1);
 
             } catch (error) {
                 console.error("Error al imprimir ambos tickets:", error);
@@ -198,6 +196,7 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 // Decidir cuál pantalla mostrar según si es con o sin precio
                 await this.showScreen(this.nextScreen, { receiptWithoutPrice: this.currentOrder.isWithoutPrice });
                 this.env.pos.db.remove_unpaid_order(this.currentOrder);
+                this.env.pos.get_order_list().splice(this.env.pos.get_order_list().indexOf(this.currentOrder), 1);
 
                 if (!hasError && syncOrderResult && this.env.pos.db.get_orders().length) {
                     const { confirmed } = await this.showPopup('ConfirmPopup', {
@@ -226,6 +225,11 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                     body: this.env._t('Hubo un problema al imprimir el recibo. Intente nuevamente.'),
                 });
             }
+        }
+
+        async _waitForOrderReady() {
+            // Espera un momento para asegurarse de que la orden y el DOM estén listos
+            await new Promise(resolve => setTimeout(resolve, 500));
         }
 
         async _postPushOrderResolve(order, order_server_ids) {
