@@ -54,6 +54,9 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 // Cambiar a la nueva orden
                 this.env.pos.set_order(newOrder);
 
+                // Esperar un momento para asegurar que la orden esté completamente activa
+                await new Promise(resolve => setTimeout(resolve, 500));
+
                 // Validar e imprimir la nueva orden sin precios
                 await this.validateOrderWithoutPrice(true);
                 await this._printReceipt();
@@ -193,7 +196,7 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
             } finally {
                 this.env.services.ui.unblock();
                 // Decidir cuál pantalla mostrar según si es con o sin precio
-                this.showScreen(this.nextScreen, { receiptWithoutPrice: this.currentOrder.isWithoutPrice });
+                await this.showScreen(this.nextScreen, { receiptWithoutPrice: this.currentOrder.isWithoutPrice });
                 this.env.pos.db.remove_unpaid_order(this.currentOrder);
 
                 if (!hasError && syncOrderResult && this.env.pos.db.get_orders().length) {
@@ -214,7 +217,7 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 if (this.env.proxy && this.env.proxy.printer) {
                     await this.env.proxy.printer.print_receipt(this.currentOrder.export_for_printing());
                 } else {
-                    this.showScreen('ReceiptScreen');
+                    await this.showScreen('ReceiptScreen');
                 }
             } catch (error) {
                 console.error("Error al imprimir el recibo:", error);
