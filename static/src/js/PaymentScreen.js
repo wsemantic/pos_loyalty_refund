@@ -5,7 +5,6 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
     const Registries = require('point_of_sale.Registries');
     const { useListener } = require("@web/core/utils/hooks");
     const { useErrorHandlers, useAsyncLockedMethod } = require('point_of_sale.custom_hooks');
-																									 
 
     const session = require('web.session');
 
@@ -22,18 +21,11 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 // Primero valida e imprime sin precios.
                 await this.validateOrderWithoutPrice(false);
 
+                // Esperar un pequeño tiempo para asegurar que la primera impresión se complete.
+                await this._waitFor(1000);
+
                 // Luego imprime el ticket con precios.
-														
-																			  
-
-																									   
-														
-
-													  
                 await this.validateOrderWithPrice(false);
-
-																						  
-													  
             } catch (error) {
                 console.error("Error al imprimir ambos tickets:", error);
                 this.showPopup('ErrorPopup', {
@@ -42,11 +34,10 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 });
             }
         }
-  
-								  
-																	  
-																							   
-																		  
+
+        _waitFor(milliseconds) {
+            return new Promise(resolve => setTimeout(resolve, milliseconds));
+        }
 
         async validateOrderWithoutPrice(isForceValidate) {
             if (this.env.pos.config.cash_rounding) {
@@ -60,7 +51,7 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
             }
             if (await this._isOrderValid(isForceValidate)) {
                 // Configurar para imprimir sin precios
-                this.currentOrder.receiptWithoutPrice = true;
+                this.currentOrder.isWithoutPrice = true;
 
                 // Remover líneas de pago pendientes antes de finalizar la validación
                 for (let line of this.paymentLines) {
@@ -82,7 +73,7 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
             }
             if (await this._isOrderValid(isForceValidate)) {
                 // Configurar para imprimir con precios
-                this.currentOrder.receiptWithoutPrice = false;
+                this.currentOrder.isWithoutPrice = false;
 
                 // Remover líneas de pago pendientes antes de finalizar la validación
                 for (let line of this.paymentLines) {
@@ -142,20 +133,14 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                     }
                 }
             } catch (error) {
-																
                 this.env.services.ui.unblock();
                 if (error.code == 700 || error.code == 701) {
                     this.error = true;
                 }
 
                 if ('code' in error) {
-																							
-																								
-																							 
-																 
                     await this._handlePushOrderError(error);
                 } else {
-																								
                     if (isConnectionError(error)) {
                         this.showPopup('OfflineErrorPopup', {
                             title: this.env._t('Connection Error'),
@@ -167,25 +152,16 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 }
             } finally {
                 this.env.services.ui.unblock();
-																				   
-												 
-                this.showScreen(this.nextScreen, { receiptWithoutPrice: this.currentOrder.receiptWithoutPrice });
-																									  
-								 
+                // Decidir cuál pantalla mostrar según si es con o sin precio
+                this.showScreen(this.nextScreen, { receiptWithoutPrice: this.currentOrder.isWithoutPrice });
                 this.env.pos.db.remove_unpaid_order(this.currentOrder);
 
-																	  
                 if (!hasError && syncOrderResult && this.env.pos.db.get_orders().length) {
                     const { confirmed } = await this.showPopup('ConfirmPopup', {
                         title: this.env._t('Remaining unsynced orders'),
-										  
                         body: this.env._t('There are unsynced orders. Do you want to sync these orders?'),
-						  
                     });
                     if (confirmed) {
-																			   
-																		   
-										  
                         this.env.pos.push_orders();
                     }
                 }
