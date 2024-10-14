@@ -42,12 +42,14 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
             }
         }
 		
-		_createOrderClone(order) {
-            // Crear un nuevo pedido y copiar los detalles del pedido original.
-            const clonedOrder = new Order({}, { pos: this.env.pos });
-            clonedOrder.init_from_JSON(order.export_as_JSON());
+        _createOrderClone(order) {
+            // Crear un nuevo pedido basado en la clase Order del POS.
+            const orderData = order.export_as_JSON();
+            const clonedOrder = new models.Order({}, { pos: this.env.pos });
 
-            // Devolver la copia del pedido.
+            // Inicializar el pedido clonado con los datos del pedido original.
+            clonedOrder.init_from_JSON(orderData);
+
             return clonedOrder;
         }
 
