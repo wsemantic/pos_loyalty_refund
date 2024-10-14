@@ -87,10 +87,10 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 // Configurar para imprimir sin precios
                 this.currentOrder.isWithoutPrice = true;
 
-                // Remover líneas de pago pendientes antes de finalizar la validación
+                /* Remover líneas de pago pendientes antes de finalizar la validación
                 for (let line of this.paymentLines) {
                     if (!line.is_done()) this.currentOrder.remove_paymentline(line);
-                }
+                }*/
                 await this._finalizeValidation();
             }
         }
@@ -127,11 +127,11 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
             }
 
             this.currentOrder.initialize_validation_date();
-            for (let line of this.paymentLines) {
+            /*for (let line of this.paymentLines) {
                 if (line.amount !== 0) {
                     this.currentOrder.remove_paymentline(line);
                 }
-            }
+            }*/
             this.currentOrder.finalized = true;
 
             let syncOrderResult, hasError;
