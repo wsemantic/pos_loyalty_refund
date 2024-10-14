@@ -23,6 +23,7 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 // Imprimir con precios primero
                 originalOrder.isWithoutPrice = false;
                 await this.validateOrderWithPrice(false);
+                this._printReceipt();
 
                 // Crear una nueva orden con los mismos productos para imprimir sin precios
                 const newOrder = this.env.pos.add_new_order();
@@ -55,6 +56,7 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
 
                 // Validar e imprimir la nueva orden sin precios
                 await this.validateOrderWithoutPrice(true);
+                this._printReceipt();
 
                 // Restaurar la orden original como la orden actual
                 this.env.pos.set_order(originalOrder);
@@ -95,9 +97,6 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                     if (!line.is_done()) this.currentOrder.remove_paymentline(line);
                 }
                 await this._finalizeValidation();
-
-                // Imprimir la orden sin precios
-                this.showScreen(this.nextScreen, { receiptWithoutPrice: true });
             }
         }
 
@@ -122,9 +121,6 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                     if (!line.is_done()) this.currentOrder.remove_paymentline(line);
                 }
                 await this._finalizeValidation();
-
-                // Imprimir la orden con precios
-                this.showScreen(this.nextScreen, { receiptWithoutPrice: false });
             }
         }
 
@@ -209,6 +205,15 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                         this.env.pos.push_orders();
                     }
                 }
+            }
+        }
+
+        _printReceipt() {
+            // Función para imprimir el recibo de la orden actual
+            if (this.env.pos.proxy.printer) {
+                this.env.pos.proxy.printer.print_receipt(this.currentOrder.export_for_printing());
+            } else {
+                this.showScreen('ReceiptScreen');
             }
         }
 
