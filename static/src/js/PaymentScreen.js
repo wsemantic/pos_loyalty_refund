@@ -23,7 +23,7 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
 
                 // Duplicar el pedido para permitir una segunda validación.
                 const originalOrder = this.currentOrder;
-                const duplicatedOrder = originalOrder.clone(); // Clonar el pedido original.
+                const duplicatedOrder = this._createOrderClone(originalOrder);
 
                 // Asignar el pedido duplicado como el actual para la segunda validación e impresión.
                 this.env.pos.set_order(duplicatedOrder);
@@ -40,6 +40,15 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                     body: this.env._t('No se pudieron imprimir ambos tickets. Verifique la conexión o los parámetros de la configuración.'),
                 });
             }
+        }
+		
+		_createOrderClone(order) {
+            // Crear un nuevo pedido y copiar los detalles del pedido original.
+            const clonedOrder = new Order({}, { pos: this.env.pos });
+            clonedOrder.init_from_JSON(order.export_as_JSON());
+
+            // Devolver la copia del pedido.
+            return clonedOrder;
         }
 
         async validateOrderWithoutPrice(isForceValidate) {
