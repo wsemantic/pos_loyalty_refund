@@ -11,20 +11,20 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
     const PosGCPaymentScreen = PaymentScreen => class extends PaymentScreen {
         setup() {
             super.setup();
-            useListener('validate-order-without-price', () => this.validateOrderWithoutPrice(false));
-            useListener('print-both-tickets', () => this.printBothTickets());  // Añadimos un listener para el nuevo botón.
+            useListener('validate-order', () => this.validateOrderWithPrice(false)); // Listener para validar con precios
+            useListener('print-both-tickets', () => this.printBothTickets()); // Añadir un listener para el nuevo botón
             this.validateOrderWithoutPrice = useAsyncLockedMethod(this.validateOrderWithoutPrice);
         }
 
         async printBothTickets() {
             try {
-                // Primero valida e imprime sin precios.
+                // Primero imprimir sin precios
                 await this.validateOrderWithoutPrice(false);
 
-                // Esperar un pequeño tiempo para asegurar que la primera impresión se complete.
+                // Esperar un pequeño tiempo para asegurar que la primera impresión se complete
                 await this._waitFor(1000);
 
-                // Luego imprime el ticket con precios.
+                // Luego imprimir con precios
                 await this.validateOrderWithPrice(false);
             } catch (error) {
                 console.error("Error al imprimir ambos tickets:", error);
@@ -127,69 +127,4 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                     );
                     if (!postPushResult) {
                         this.showPopup('ErrorPopup', {
-                            title: this.env._t('Error: no internet connection.'),
-                            body: this.env._t('Some, if not all, post-processing after syncing order failed.'),
-                        });
-                    }
-                }
-            } catch (error) {
-                this.env.services.ui.unblock();
-                if (error.code == 700 || error.code == 701) {
-                    this.error = true;
-                }
-
-                if ('code' in error) {
-                    await this._handlePushOrderError(error);
-                } else {
-                    if (isConnectionError(error)) {
-                        this.showPopup('OfflineErrorPopup', {
-                            title: this.env._t('Connection Error'),
-                            body: this.env._t('Order is not synced. Check your internet connection'),
-                        });
-                    } else {
-                        throw error;
-                    }
-                }
-            } finally {
-                this.env.services.ui.unblock();
-                // Decidir cuál pantalla mostrar según si es con o sin precio
-                this.showScreen(this.nextScreen, { receiptWithoutPrice: this.currentOrder.isWithoutPrice });
-                this.env.pos.db.remove_unpaid_order(this.currentOrder);
-
-                if (!hasError && syncOrderResult && this.env.pos.db.get_orders().length) {
-                    const { confirmed } = await this.showPopup('ConfirmPopup', {
-                        title: this.env._t('Remaining unsynced orders'),
-                        body: this.env._t('There are unsynced orders. Do you want to sync these orders?'),
-                    });
-                    if (confirmed) {
-                        this.env.pos.push_orders();
-                    }
-                }
-            }
-        }
-
-        async _postPushOrderResolve(order, order_server_ids) {
-            const res = await super._postPushOrderResolve(...arguments);
-            let result = await this.rpc({
-                model: 'pos.order',
-                method: 'get_giftcard_lines',
-                args: [order_server_ids],
-                kwargs: { context: session.user_context },
-            });
-            if (Object.keys(result.updated_lines).length) {
-                for (const line of order.get_orderlines()) {
-                    if (this.env.pos.config.gift_card_product_id[0] == line.product.id) {
-                        const gclines = Object.values(result.updated_lines).filter((value) => value.price === line.price);
-                        line.gift_card_code = gclines[0].gift_card_code;
-                        line.gift_card_balance = gclines[0].gift_card_balance;
-                    }
-                }
-            }
-            return res;
-        }
-    };
-
-    Registries.Component.extend(PaymentScreen, PosGCPaymentScreen);
-
-    return PosGCPaymentScreen;
-});
+                            ti
