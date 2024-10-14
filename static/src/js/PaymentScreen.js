@@ -15,13 +15,24 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
 			useListener('print-both-tickets', () => this.printBothTickets());  // Añadimos un listener para el nuevo botón.																															 
             this.validateOrderWithoutPrice = useAsyncLockedMethod(this.validateOrderWithoutPrice);
         }
+
         async printBothTickets() {
             try {
                 // Primero valida e imprime sin precios.
                 await this.validateOrderWithoutPrice(false);
-				this.currentOrder.finalized = false;
+
+                // Duplicar el pedido para permitir una segunda validación.
+                const originalOrder = this.currentOrder;
+                const duplicatedOrder = originalOrder.clone(); // Clonar el pedido original.
+
+                // Asignar el pedido duplicado como el actual para la segunda validación e impresión.
+                this.env.pos.set_order(duplicatedOrder);
+
                 // Luego valida e imprime con precios.
                 await this.validateOrder(false);
+
+                // Restaurar el pedido original para asegurar consistencia en la interfaz.
+                this.env.pos.set_order(originalOrder);
             } catch (error) {
                 console.error("Error al imprimir ambos tickets:", error);
                 this.showPopup('ErrorPopup', {
@@ -30,6 +41,7 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 });
             }
         }
+
         async validateOrderWithoutPrice(isForceValidate) {
             if(this.env.pos.config.cash_rounding) {
                 if(!this.env.pos.get_order().check_paymentlines_rounding()) {
