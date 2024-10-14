@@ -47,7 +47,7 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 this.env.pos.set_order(newOrder);
 
                 // Validar e imprimir la nueva orden con precios
-                await this.validateOrderWithPrice(false);
+                await this.validateOrderWithPrice(true);
 
                 // Restaurar la orden original como la orden actual
                 this.env.pos.set_order(originalOrder);
@@ -105,7 +105,9 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                     return;
                 }
             }
+            console.log("Antes de _isOrderValid");
             if (await this._isOrderValid(isForceValidate)) {
+                console.log("Orden válida, procediendo a finalizar");
                 // Configurar para imprimir con precios
                 this.currentOrder.isWithoutPrice = false;
 
