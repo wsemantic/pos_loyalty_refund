@@ -5,6 +5,7 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
     const Registries = require('point_of_sale.Registries');
     const { useListener } = require("@web/core/utils/hooks");
     const { useErrorHandlers, useAsyncLockedMethod } = require('point_of_sale.custom_hooks');
+	const models = require('point_of_sale.models');  // Importamos los modelos POS, incluido 'Order'.		 
 
     const session = require('web.session');
     
