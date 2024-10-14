@@ -19,7 +19,7 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
             try {
                 // Primero valida e imprime sin precios.
                 await this.validateOrderWithoutPrice(false);
-
+				this.currentOrder.finalized = false;
                 // Luego valida e imprime con precios.
                 await this.validateOrder(false);
             } catch (error) {
