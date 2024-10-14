@@ -5,71 +5,35 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
     const Registries = require('point_of_sale.Registries');
     const { useListener } = require("@web/core/utils/hooks");
     const { useErrorHandlers, useAsyncLockedMethod } = require('point_of_sale.custom_hooks');
+    const Order = require('point_of_sale.models').Order;
 
     const session = require('web.session');
-
+    
     const PosGCPaymentScreen = PaymentScreen => class extends PaymentScreen {
         setup() {
             super.setup();
-            useListener('validate-order', () => this.validateOrderWithPrice(false)); // Listener para validar con precios
-            useListener('print-both-tickets', () => this.printBothTickets()); // Añadir un listener para el nuevo botón
+            useListener('validate-order-without-price', () => this.validateOrderWithoutPrice(false));
+            useListener('print-both-tickets', () => this.printBothTickets());  // Añadimos un listener para el nuevo botón.
             this.validateOrderWithoutPrice = useAsyncLockedMethod(this.validateOrderWithoutPrice);
         }
 
         async printBothTickets() {
             try {
+                // Primero valida e imprime sin precios.
+                await this.validateOrderWithoutPrice(false);
+
+                // Duplicar manualmente el pedido.
                 const originalOrder = this.currentOrder;
-                
-                // Imprimir con precios primero
-                originalOrder.isWithoutPrice = false;
-                await this.validateOrderWithPrice(false);
+                const duplicatedOrder = this._createOrderClone(originalOrder);
 
-                // Esperar un pequeño tiempo para asegurar que la primera impresión se complete
-                await this._waitFor(1000);
+                // Asignar el pedido duplicado como el actual para la segunda validación e impresión.
+                this.env.pos.set_order(duplicatedOrder);
 
-                // Crear una nueva orden con los mismos productos para imprimir sin precios
-                const newOrder = this.env.pos.add_new_order();
-                
-                // Copiar los productos de la orden original a la nueva orden
-                for (let line of originalOrder.get_orderlines()) {
-                    newOrder.add_product(line.product, {
-                        quantity: line.quantity,
-                        price: line.price,
-                        discount: line.discount,
-                    });
-                }
+                // Luego valida e imprime con precios.
+                await this.validateOrder(false);
 
-                // Agregar un método de pago temporal si no hay líneas de pago
-                if (newOrder.get_total_with_tax() != 0 && newOrder.get_paymentlines().length === 0) {
-                    let paymentMethod = this.env.pos.payment_methods.find(method => method.is_cash_count);
-                    if (!paymentMethod) {
-                        paymentMethod = this.env.pos.payment_methods[0]; // Seleccionar el primer método de pago si no se encuentra efectivo
-                    }
-                    const paymentline = newOrder.add_paymentline(paymentMethod);
-                    paymentline.set_amount(newOrder.get_total_with_tax());
-                }
-
-                // Configurar la nueva orden para imprimir sin precios
-                newOrder.isWithoutPrice = true;
-                newOrder.isTemporaryPrintOrder = true;
-
-                // Cambiar a la nueva orden
-                this.env.pos.set_order(newOrder);
-
-                // Validar e imprimir la nueva orden sin precios
-                await this.validateOrderWithoutPrice(true);
-
-                // Restaurar la orden original como la orden actual
+                // Restaurar el pedido original para asegurar consistencia en la interfaz.
                 this.env.pos.set_order(originalOrder);
-                
-                // Marcar la orden temporal como finalizada
-                newOrder.finalized = true;
-
-                // Limpiar la orden temporal del historial de órdenes si es posible
-                if (this.env.pos.db && typeof this.env.pos.db.remove_order === 'function') {
-                    this.env.pos.db.remove_order(newOrder.id);
-                }
-
             } catch (error) {
                 console.error("Error al imprimir ambos tickets:", error);
                 this.showPopup('ErrorPopup', {
@@ -79,13 +43,18 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
             }
         }
 
-        _waitFor(milliseconds) {
-            return new Promise(resolve => setTimeout(resolve, milliseconds));
+        _createOrderClone(order) {
+            // Crear un nuevo pedido y copiar los detalles del pedido original.
+            const clonedOrder = new Order({}, { pos: this.env.pos });
+            clonedOrder.init_from_JSON(order.export_as_JSON());
+
+            // Devolver la copia del pedido.
+            return clonedOrder;
         }
 
         async validateOrderWithoutPrice(isForceValidate) {
-            if (this.env.pos.config.cash_rounding) {
-                if (!this.env.pos.get_order().check_paymentlines_rounding()) {
+            if(this.env.pos.config.cash_rounding) {
+                if(!this.env.pos.get_order().check_paymentlines_rounding()) {
                     this.showPopup('ErrorPopup', {
                         title: this.env._t('Rounding error in payment lines'),
                         body: this.env._t("The amount of your payment lines must be rounded to validate the transaction."),
@@ -94,94 +63,65 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 }
             }
             if (await this._isOrderValid(isForceValidate)) {
-                // Configurar para imprimir sin precios
-                this.currentOrder.isWithoutPrice = true;
-
-                // Remover líneas de pago pendientes antes de finalizar la validación
+                // remove pending payments before finalizing the validation
                 for (let line of this.paymentLines) {
                     if (!line.is_done()) this.currentOrder.remove_paymentline(line);
                 }
-                await this._finalizeValidation();
+                await this._finalizeValidationWithoutPrice();
             }
         }
 
-        async validateOrderWithPrice(isForceValidate) {
-            if (this.env.pos.config.cash_rounding) {
-                if (!this.env.pos.get_order().check_paymentlines_rounding()) {
-                    this.showPopup('ErrorPopup', {
-                        title: this.env._t('Rounding error in payment lines'),
-                        body: this.env._t("The amount of your payment lines must be rounded to validate the transaction."),
-                    });
-                    return;
-                }
-            }
-            console.log("Antes de _isOrderValid");
-            if (await this._isOrderValid(isForceValidate)) {
-                console.log("Orden válida, procediendo a finalizar");
-                // Configurar para imprimir con precios
-                this.currentOrder.isWithoutPrice = false;
-
-                // Remover líneas de pago pendientes antes de finalizar la validación
-                for (let line of this.paymentLines) {
-                    if (!line.is_done()) this.currentOrder.remove_paymentline(line);
-                }
-                await this._finalizeValidation();
-            }
-        }
-
-        async _finalizeValidation() {
-            if ((this.currentOrder.is_paid_with_cash() || this.currentOrder.get_change()) &&
-                this.env.pos.config.iface_cashdrawer &&
-                this.env.proxy && this.env.proxy.printer) {
+        async _finalizeValidationWithoutPrice() {
+            if ((this.currentOrder.is_paid_with_cash() || this.currentOrder.get_change()) && this.env.pos.config.iface_cashdrawer && this.env.proxy && this.env.proxy.printer) {
                 this.env.proxy.printer.open_cashbox();
             }
 
             this.currentOrder.initialize_validation_date();
-            // No se eliminan las líneas de pago para mantener el historial de pagos
+            for (let line of this.paymentLines) {
+                if (!line.amount === 0) {
+                     this.currentOrder.remove_paymentline(line);
+                }
+            }
             this.currentOrder.finalized = true;
 
             let syncOrderResult, hasError;
 
             try {
-                this.env.services.ui.block();
+                this.env.services.ui.block()
+                // 1. Save order to server.
+                syncOrderResult = await this.env.pos.push_single_order(this.currentOrder);
 
-                // Solo sincronizar si no es una orden temporal de impresión
-                if (!this.currentOrder.isTemporaryPrintOrder) {                                                                
-                    // 1. Guardar el pedido en el servidor.
-                    syncOrderResult = await this.env.pos.push_single_order(this.currentOrder);
-
-                    // 2. Facturar.
-                    if (this.shouldDownloadInvoice() && this.currentOrder.is_to_invoice()) {
-                        if (syncOrderResult.length) {
-                            await this.env.legacyActionManager.do_action(this.env.pos.invoiceReportAction, {
-                                additional_context: {
-                                    active_ids: [syncOrderResult[0].account_move],
-                                },
-                            });
-                        } else {
-                            throw { code: 401, message: 'Backend Invoice', data: { order: this.currentOrder } };
-                        }
+                // 2. Invoice.
+                if (this.shouldDownloadInvoice() && this.currentOrder.is_to_invoice()) {
+                    if (syncOrderResult.length) {
+                        await this.env.legacyActionManager.do_action(this.env.pos.invoiceReportAction, {
+                            additional_context: {
+                                active_ids: [syncOrderResult[0].account_move],
+                            },
+                        });
+                    } else {
+                        throw { code: 401, message: 'Backend Invoice', data: { order: this.currentOrder } };
                     }
+                }
 
-                    // 3. Post-procesar.
-                    if (syncOrderResult.length && this.currentOrder.wait_for_push_order()) {
-                        const postPushResult = await this._postPushOrderResolve(
-                            this.currentOrder,
-                            syncOrderResult.map((res) => res.id)
-                        );
-                        if (!postPushResult) {
-                            this.showPopup('ErrorPopup', {
-                                title: this.env._t('Error: no internet connection.'),
-                                body: this.env._t('Some, if not all, post-processing after syncing order failed.'),
-                            });
-                        }
+                // 3. Post process.
+                if (syncOrderResult.length && this.currentOrder.wait_for_push_order()) {
+                    const postPushResult = await this._postPushOrderResolve(
+                        this.currentOrder,
+                        syncOrderResult.map((res) => res.id)
+                    );
+                    if (!postPushResult) {
+                        this.showPopup('ErrorPopup', {
+                            title: this.env._t('Error: no internet connection.'),
+                            body: this.env._t('Some, if not all, post-processing after syncing order failed.'),
+                        });
                     }
                 }
             } catch (error) {
+                // unblock the UI before showing the error popup
                 this.env.services.ui.unblock();
-                if (error.code == 700 || error.code == 701) {
+                if (error.code == 700 || error.code == 701)
                     this.error = true;
-                }
 
                 if ('code' in error) {
                     await this._handlePushOrderError(error);
@@ -196,15 +136,16 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                     }
                 }
             } finally {
-                this.env.services.ui.unblock();
-                // Decidir cuál pantalla mostrar según si es con o sin precio
-                this.showScreen(this.nextScreen, { receiptWithoutPrice: this.currentOrder.isWithoutPrice });
+                this.env.services.ui.unblock()
+                this.showScreen(this.nextScreen, {receiptWithoutPrice: true});
                 this.env.pos.db.remove_unpaid_order(this.currentOrder);
 
                 if (!hasError && syncOrderResult && this.env.pos.db.get_orders().length) {
                     const { confirmed } = await this.showPopup('ConfirmPopup', {
                         title: this.env._t('Remaining unsynced orders'),
-                        body: this.env._t('There are unsynced orders. Do you want to sync these orders?'),
+                        body: this.env._t(
+                            'There are unsynced orders. Do you want to sync these orders?'
+                        ),
                     });
                     if (confirmed) {
                         this.env.pos.push_orders();
@@ -221,12 +162,12 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 args: [order_server_ids],
                 kwargs: { context: session.user_context },
             });
-            if (Object.keys(result.updated_lines).length) {
+            if (Object.keys(result.updated_lines).length){
                 for (const line of order.get_orderlines()) {
-                    if (this.env.pos.config.gift_card_product_id[0] == line.product.id) {
+                    if(this.env.pos.config.gift_card_product_id[0] == line.product.id) {
                         const gclines = Object.values(result.updated_lines).filter((value) => value.price === line.price);
-                        line.gift_card_code = gclines[0].gift_card_code;
-                        line.gift_card_balance = gclines[0].gift_card_balance;
+                        line.gift_card_code = gclines[0].gift_card_code
+                        line.gift_card_balance = gclines[0].gift_card_balance
                     }
                 }
             }
