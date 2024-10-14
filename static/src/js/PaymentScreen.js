@@ -213,8 +213,14 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
         async _printReceipt() {
             // Función para imprimir el recibo de la orden actual
             try {
-                if (this.env.proxy && this.env.proxy.printer) {
-                    await this.env.proxy.printer.print_receipt(this.currentOrder.export_for_printing());
+                if (this.env.proxy && this.env.proxy.printer && this.currentOrder) {
+                    const receipt = this.currentOrder.export_for_printing();
+                    if (receipt && receipt.orderlines && receipt.orderlines.length > 0) {
+                        await this.env.proxy.printer.print_receipt(receipt);
+                    } else {
+                        console.error("Recibo vacío o no válido.");
+                        throw new Error("Recibo vacío o no válido");
+                    }
                 } else {
                     await this.showScreen('ReceiptScreen');
                 }
