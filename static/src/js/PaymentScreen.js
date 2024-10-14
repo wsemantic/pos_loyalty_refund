@@ -20,14 +20,14 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
             try {
                 const originalOrder = this.currentOrder;
                 
-                // Imprimir sin precios
-                originalOrder.isWithoutPrice = true;
-                await this.validateOrderWithoutPrice(false);
+                // Imprimir con precios primero
+                originalOrder.isWithoutPrice = false;
+                await this.validateOrderWithPrice(false);
 
                 // Esperar un pequeño tiempo para asegurar que la primera impresión se complete
                 await this._waitFor(1000);
 
-                // Crear una nueva orden con los mismos productos para imprimir con precios
+                // Crear una nueva orden con los mismos productos para imprimir sin precios
                 const newOrder = this.env.pos.add_new_order();
                 
                 // Copiar los productos de la orden original a la nueva orden
@@ -39,15 +39,25 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                     });
                 }
 
-                // Configurar la nueva orden para imprimir con precios
-                newOrder.isWithoutPrice = false;
+                // Agregar un método de pago temporal si no hay líneas de pago
+                if (newOrder.get_total_with_tax() != 0 && newOrder.get_paymentlines().length === 0) {
+                    let paymentMethod = this.env.pos.payment_methods.find(method => method.is_cash_count);
+                    if (!paymentMethod) {
+                        paymentMethod = this.env.pos.payment_methods[0]; // Seleccionar el primer método de pago si no se encuentra efectivo
+                    }
+                    const paymentline = newOrder.add_paymentline(paymentMethod);
+                    paymentline.set_amount(newOrder.get_total_with_tax());
+                }
+
+                // Configurar la nueva orden para imprimir sin precios
+                newOrder.isWithoutPrice = true;
                 newOrder.isTemporaryPrintOrder = true;
 
                 // Cambiar a la nueva orden
                 this.env.pos.set_order(newOrder);
 
-                // Validar e imprimir la nueva orden con precios
-                await this.validateOrderWithPrice(true);
+                // Validar e imprimir la nueva orden sin precios
+                await this.validateOrderWithoutPrice(true);
 
                 // Restaurar la orden original como la orden actual
                 this.env.pos.set_order(originalOrder);
@@ -87,10 +97,10 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 // Configurar para imprimir sin precios
                 this.currentOrder.isWithoutPrice = true;
 
-                /* Remover líneas de pago pendientes antes de finalizar la validación
+                // Remover líneas de pago pendientes antes de finalizar la validación
                 for (let line of this.paymentLines) {
                     if (!line.is_done()) this.currentOrder.remove_paymentline(line);
-                }*/
+                }
                 await this._finalizeValidation();
             }
         }
@@ -111,10 +121,10 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 // Configurar para imprimir con precios
                 this.currentOrder.isWithoutPrice = false;
 
-                /* Remover líneas de pago pendientes antes de finalizar la validación
+                // Remover líneas de pago pendientes antes de finalizar la validación
                 for (let line of this.paymentLines) {
                     if (!line.is_done()) this.currentOrder.remove_paymentline(line);
-                }*/
+                }
                 await this._finalizeValidation();
             }
         }
@@ -127,11 +137,7 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
             }
 
             this.currentOrder.initialize_validation_date();
-            /*for (let line of this.paymentLines) {
-                if (line.amount !== 0) {
-                    this.currentOrder.remove_paymentline(line);
-                }
-            }*/
+            // No se eliminan las líneas de pago para mantener el historial de pagos
             this.currentOrder.finalized = true;
 
             let syncOrderResult, hasError;
@@ -140,38 +146,37 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 this.env.services.ui.block();
 
                 // Solo sincronizar si no es una orden temporal de impresión
-                if (!this.currentOrder.isTemporaryPrintOrder) {															   
-					// 1. Guardar el pedido en el servidor.
-					syncOrderResult = await this.env.pos.push_single_order(this.currentOrder);
+                if (!this.currentOrder.isTemporaryPrintOrder) {                                                                
+                    // 1. Guardar el pedido en el servidor.
+                    syncOrderResult = await this.env.pos.push_single_order(this.currentOrder);
 
-					// 2. Facturar.
-					if (this.shouldDownloadInvoice() && this.currentOrder.is_to_invoice()) {
-						if (syncOrderResult.length) {
-							await this.env.legacyActionManager.do_action(this.env.pos.invoiceReportAction, {
-								additional_context: {
-									active_ids: [syncOrderResult[0].account_move],
-								},
-							});
-						} else {
-							throw { code: 401, message: 'Backend Invoice', data: { order: this.currentOrder } };
-						}
-					}
+                    // 2. Facturar.
+                    if (this.shouldDownloadInvoice() && this.currentOrder.is_to_invoice()) {
+                        if (syncOrderResult.length) {
+                            await this.env.legacyActionManager.do_action(this.env.pos.invoiceReportAction, {
+                                additional_context: {
+                                    active_ids: [syncOrderResult[0].account_move],
+                                },
+                            });
+                        } else {
+                            throw { code: 401, message: 'Backend Invoice', data: { order: this.currentOrder } };
+                        }
+                    }
 
-					// 3. Post-procesar.
-					if (syncOrderResult.length && this.currentOrder.wait_for_push_order()) {
-						const postPushResult = await this._postPushOrderResolve(
-							this.currentOrder,
-							syncOrderResult.map((res) => res.id)
-						);
-						if (!postPushResult) {
-							this.showPopup('ErrorPopup', {
-								title: this.env._t('Error: no internet connection.'),
-								body: this.env._t('Some, if not all, post-processing after syncing order failed.'),
-							});
-                 
-						}
-					}
-				}
+                    // 3. Post-procesar.
+                    if (syncOrderResult.length && this.currentOrder.wait_for_push_order()) {
+                        const postPushResult = await this._postPushOrderResolve(
+                            this.currentOrder,
+                            syncOrderResult.map((res) => res.id)
+                        );
+                        if (!postPushResult) {
+                            this.showPopup('ErrorPopup', {
+                                title: this.env._t('Error: no internet connection.'),
+                                body: this.env._t('Some, if not all, post-processing after syncing order failed.'),
+                            });
+                        }
+                    }
+                }
             } catch (error) {
                 this.env.services.ui.unblock();
                 if (error.code == 700 || error.code == 701) {
