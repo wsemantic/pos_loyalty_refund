@@ -5,15 +5,15 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
     const Registries = require('point_of_sale.Registries');
     const { useListener } = require("@web/core/utils/hooks");
     const { useErrorHandlers, useAsyncLockedMethod } = require('point_of_sale.custom_hooks');
-	const models = require('point_of_sale.models');  // Importamos los modelos POS, incluido 'Order'.		 
+																									 
 
     const session = require('web.session');
-    
+
     const PosGCPaymentScreen = PaymentScreen => class extends PaymentScreen {
         setup() {
             super.setup();
             useListener('validate-order-without-price', () => this.validateOrderWithoutPrice(false));
-			useListener('print-both-tickets', () => this.printBothTickets());  // Añadimos un listener para el nuevo botón.																															 
+            useListener('print-both-tickets', () => this.printBothTickets());  // Añadimos un listener para el nuevo botón.
             this.validateOrderWithoutPrice = useAsyncLockedMethod(this.validateOrderWithoutPrice);
         }
 
@@ -22,18 +22,18 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 // Primero valida e imprime sin precios.
                 await this.validateOrderWithoutPrice(false);
 
-                // Duplicar el pedido para permitir una segunda validación.
-                const originalOrder = this.currentOrder;
-                const duplicatedOrder = this._createOrderClone(originalOrder);
+                // Luego imprime el ticket con precios.
+														
+																			  
 
-                // Asignar el pedido duplicado como el actual para la segunda validación e impresión.
-                this.env.pos.set_order(duplicatedOrder);
+																									   
+														
 
-                // Luego valida e imprime con precios.
-                await this.validateOrder(false);
+													  
+                await this.validateOrderWithPrice(false);
 
-                // Restaurar el pedido original para asegurar consistencia en la interfaz.
-                this.env.pos.set_order(originalOrder);
+																						  
+													  
             } catch (error) {
                 console.error("Error al imprimir ambos tickets:", error);
                 this.showPopup('ErrorPopup', {
@@ -42,21 +42,15 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 });
             }
         }
-		
-        _createOrderClone(order) {
-            // Crear un nuevo pedido basado en la clase Order del POS.
-            const OrderClass = models.Order;  // Obtener la clase Order del módulo de modelos.
-            const clonedOrder = new OrderClass({}, { pos: this.env.pos });
-
-            // Inicializar el pedido clonado con los datos del pedido original.
-            clonedOrder.init_from_JSON(order.export_as_JSON());
-
-            return clonedOrder;
-        }
+  
+								  
+																	  
+																							   
+																		  
 
         async validateOrderWithoutPrice(isForceValidate) {
-            if(this.env.pos.config.cash_rounding) {
-                if(!this.env.pos.get_order().check_paymentlines_rounding()) {
+            if (this.env.pos.config.cash_rounding) {
+                if (!this.env.pos.get_order().check_paymentlines_rounding()) {
                     this.showPopup('ErrorPopup', {
                         title: this.env._t('Rounding error in payment lines'),
                         body: this.env._t("The amount of your payment lines must be rounded to validate the transaction."),
@@ -65,22 +59,50 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 }
             }
             if (await this._isOrderValid(isForceValidate)) {
-                // remove pending payments before finalizing the validation
+                // Configurar para imprimir sin precios
+                this.currentOrder.receiptWithoutPrice = true;
+
+                // Remover líneas de pago pendientes antes de finalizar la validación
                 for (let line of this.paymentLines) {
                     if (!line.is_done()) this.currentOrder.remove_paymentline(line);
                 }
-                await this._finalizeValidationWithoutPrice();
+                await this._finalizeValidation();
             }
         }
-        async _finalizeValidationWithoutPrice() {
-            if ((this.currentOrder.is_paid_with_cash() || this.currentOrder.get_change()) && this.env.pos.config.iface_cashdrawer && this.env.proxy && this.env.proxy.printer) {
+
+        async validateOrderWithPrice(isForceValidate) {
+            if (this.env.pos.config.cash_rounding) {
+                if (!this.env.pos.get_order().check_paymentlines_rounding()) {
+                    this.showPopup('ErrorPopup', {
+                        title: this.env._t('Rounding error in payment lines'),
+                        body: this.env._t("The amount of your payment lines must be rounded to validate the transaction."),
+                    });
+                    return;
+                }
+            }
+            if (await this._isOrderValid(isForceValidate)) {
+                // Configurar para imprimir con precios
+                this.currentOrder.receiptWithoutPrice = false;
+
+                // Remover líneas de pago pendientes antes de finalizar la validación
+                for (let line of this.paymentLines) {
+                    if (!line.is_done()) this.currentOrder.remove_paymentline(line);
+                }
+                await this._finalizeValidation();
+            }
+        }
+
+        async _finalizeValidation() {
+            if ((this.currentOrder.is_paid_with_cash() || this.currentOrder.get_change()) &&
+                this.env.pos.config.iface_cashdrawer &&
+                this.env.proxy && this.env.proxy.printer) {
                 this.env.proxy.printer.open_cashbox();
             }
 
             this.currentOrder.initialize_validation_date();
             for (let line of this.paymentLines) {
-                if (!line.amount === 0) {
-                     this.currentOrder.remove_paymentline(line);
+                if (line.amount !== 0) {
+                    this.currentOrder.remove_paymentline(line);
                 }
             }
             this.currentOrder.finalized = true;
@@ -88,11 +110,12 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
             let syncOrderResult, hasError;
 
             try {
-                this.env.services.ui.block()
-                // 1. Save order to server.
+                this.env.services.ui.block();
+
+                // 1. Guardar el pedido en el servidor.
                 syncOrderResult = await this.env.pos.push_single_order(this.currentOrder);
 
-                // 2. Invoice.
+                // 2. Facturar.
                 if (this.shouldDownloadInvoice() && this.currentOrder.is_to_invoice()) {
                     if (syncOrderResult.length) {
                         await this.env.legacyActionManager.do_action(this.env.pos.invoiceReportAction, {
@@ -105,7 +128,7 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                     }
                 }
 
-                // 3. Post process.
+                // 3. Post-procesar.
                 if (syncOrderResult.length && this.currentOrder.wait_for_push_order()) {
                     const postPushResult = await this._postPushOrderResolve(
                         this.currentOrder,
@@ -119,19 +142,20 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                     }
                 }
             } catch (error) {
-                // unblock the UI before showing the error popup
+																
                 this.env.services.ui.unblock();
-                if (error.code == 700 || error.code == 701)
+                if (error.code == 700 || error.code == 701) {
                     this.error = true;
+                }
 
                 if ('code' in error) {
-                    // We started putting `code` in the rejected object for invoicing error.
-                    // We can continue with that convention such that when the error has `code`,
-                    // then it is an error when invoicing. Besides, _handlePushOrderError was
-                    // introduce to handle invoicing error logic.
+																							
+																								
+																							 
+																 
                     await this._handlePushOrderError(error);
                 } else {
-                    // We don't block for connection error. But we rethrow for any other errors.
+																								
                     if (isConnectionError(error)) {
                         this.showPopup('OfflineErrorPopup', {
                             title: this.env._t('Connection Error'),
@@ -142,31 +166,32 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                     }
                 }
             } finally {
-                this.env.services.ui.unblock()
-                // Always show the next screen regardless of error since pos has to
-                // continue working even offline.
-                this.showScreen(this.nextScreen, {receiptWithoutPrice: true});
-                // Remove the order from the local storage so that when we refresh the page, the order
-                // won't be there
+                this.env.services.ui.unblock();
+																				   
+												 
+                this.showScreen(this.nextScreen, { receiptWithoutPrice: this.currentOrder.receiptWithoutPrice });
+																									  
+								 
                 this.env.pos.db.remove_unpaid_order(this.currentOrder);
 
-                // Ask the user to sync the remaining unsynced orders.
+																	  
                 if (!hasError && syncOrderResult && this.env.pos.db.get_orders().length) {
                     const { confirmed } = await this.showPopup('ConfirmPopup', {
                         title: this.env._t('Remaining unsynced orders'),
-                        body: this.env._t(
-                            'There are unsynced orders. Do you want to sync these orders?'
-                        ),
+										  
+                        body: this.env._t('There are unsynced orders. Do you want to sync these orders?'),
+						  
                     });
                     if (confirmed) {
-                        // NOTE: Not yet sure if this should be awaited or not.
-                        // If awaited, some operations like changing screen
-                        // might not work.
+																			   
+																		   
+										  
                         this.env.pos.push_orders();
                     }
                 }
             }
         }
+
         async _postPushOrderResolve(order, order_server_ids) {
             const res = await super._postPushOrderResolve(...arguments);
             let result = await this.rpc({
@@ -175,12 +200,12 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 args: [order_server_ids],
                 kwargs: { context: session.user_context },
             });
-            if (Object.keys(result.updated_lines).length){
+            if (Object.keys(result.updated_lines).length) {
                 for (const line of order.get_orderlines()) {
-                    if(this.env.pos.config.gift_card_product_id[0] == line.product.id) {
+                    if (this.env.pos.config.gift_card_product_id[0] == line.product.id) {
                         const gclines = Object.values(result.updated_lines).filter((value) => value.price === line.price);
-                        line.gift_card_code = gclines[0].gift_card_code
-                        line.gift_card_balance = gclines[0].gift_card_balance
+                        line.gift_card_code = gclines[0].gift_card_code;
+                        line.gift_card_balance = gclines[0].gift_card_balance;
                     }
                 }
             }
