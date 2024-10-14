@@ -23,7 +23,7 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 // Imprimir con precios primero
                 originalOrder.isWithoutPrice = false;
                 await this.validateOrderWithPrice(false);
-                this._printReceipt();
+                await this._printReceipt();
 
                 // Crear una nueva orden con los mismos productos para imprimir sin precios
                 const newOrder = this.env.pos.add_new_order();
@@ -56,7 +56,7 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
 
                 // Validar e imprimir la nueva orden sin precios
                 await this.validateOrderWithoutPrice(true);
-                this._printReceipt();
+                await this._printReceipt();
 
                 // Restaurar la orden original como la orden actual
                 this.env.pos.set_order(originalOrder);
@@ -208,12 +208,20 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
             }
         }
 
-        _printReceipt() {
+        async _printReceipt() {
             // Función para imprimir el recibo de la orden actual
-            if (this.env.proxy && this.env.proxy.printer) {
-                this.env.proxy.printer.print_receipt(this.currentOrder.export_for_printing());
-            } else {
-                this.showScreen('ReceiptScreen');
+            try {
+                if (this.env.proxy && this.env.proxy.printer) {
+                    await this.env.proxy.printer.print_receipt(this.currentOrder.export_for_printing());
+                } else {
+                    this.showScreen('ReceiptScreen');
+                }
+            } catch (error) {
+                console.error("Error al imprimir el recibo:", error);
+                this.showPopup('ErrorPopup', {
+                    title: this.env._t('Error de impresión'),
+                    body: this.env._t('Hubo un problema al imprimir el recibo. Intente nuevamente.'),
+                });
             }
         }
 
