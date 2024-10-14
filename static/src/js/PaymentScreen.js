@@ -210,8 +210,8 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
 
         _printReceipt() {
             // Función para imprimir el recibo de la orden actual
-            if (this.env.pos.proxy.printer) {
-                this.env.pos.proxy.printer.print_receipt(this.currentOrder.export_for_printing());
+            if (this.env.proxy && this.env.proxy.printer) {
+                this.env.proxy.printer.print_receipt(this.currentOrder.export_for_printing());
             } else {
                 this.showScreen('ReceiptScreen');
             }
