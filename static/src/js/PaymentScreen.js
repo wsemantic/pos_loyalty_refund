@@ -18,15 +18,18 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
 
         async printBothTickets() {
             try {
-                // Primero imprimir sin precios
+                const originalOrder = this.currentOrder;
+                
+                // Imprimir sin precios
+                originalOrder.isWithoutPrice = true;
                 await this.validateOrderWithoutPrice(false);
 
                 // Esperar un pequeño tiempo para asegurar que la primera impresión se complete
                 await this._waitFor(1000);
 
                 // Crear una nueva orden con los mismos productos para imprimir con precios
-                const originalOrder = this.currentOrder;
-                const newOrder = this.env.pos.get_order();
+														
+                const newOrder = this.env.pos.add_new_order();
                 
                 // Copiar los productos de la orden original a la nueva orden
                 for (let line of originalOrder.get_orderlines()) {
@@ -39,13 +42,20 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
 
                 // Configurar la nueva orden para imprimir con precios
                 newOrder.isWithoutPrice = false;
+                newOrder.isTemporaryPrintOrder = true;
+
+                // Cambiar a la nueva orden
+                this.env.pos.set_order(newOrder);
 
                 // Validar e imprimir la nueva orden con precios
-                this.currentOrder = newOrder;
+											 
                 await this.validateOrderWithPrice(false);
 
                 // Restaurar la orden original como la orden actual
                 this.env.pos.set_order(originalOrder);
+                
+                // Eliminar la orden temporal
+                this.env.pos.remove_order(newOrder);
             } catch (error) {
                 console.error("Error al imprimir ambos tickets:", error);
                 this.showPopup('ErrorPopup', {
