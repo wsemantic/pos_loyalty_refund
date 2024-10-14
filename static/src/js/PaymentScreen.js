@@ -129,89 +129,98 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
             }
         }
 
-        async _finalizeValidation() {
-            if ((this.currentOrder.is_paid_with_cash() || this.currentOrder.get_change()) &&
-                this.env.pos.config.iface_cashdrawer &&
-                this.env.proxy && this.env.proxy.printer) {
-                this.env.proxy.printer.open_cashbox();
-            }
+	async _finalizeValidation() {
+		if ((this.currentOrder.is_paid_with_cash() || this.currentOrder.get_change()) &&
+			this.env.pos.config.iface_cashdrawer &&
+			this.env.proxy && this.env.proxy.printer) {
+			this.env.proxy.printer.open_cashbox();
+		}
 
-            this.currentOrder.initialize_validation_date();
-            // No se eliminan las líneas de pago para mantener el historial de pagos
-            this.currentOrder.finalized = true;
+		this.currentOrder.initialize_validation_date();
 
-            let syncOrderResult, hasError;
+		// Remover líneas de pago pendientes antes de finalizar la validación (mantener lógica original)
+		for (let line of this.paymentLines) {
+			if (!line.is_done()) this.currentOrder.remove_paymentline(line);
+		}
 
-            try {
-                this.env.services.ui.block();
+		this.currentOrder.finalized = true;
 
-                // Solo sincronizar si no es una orden temporal de impresión
-                if (!this.currentOrder.isTemporaryPrintOrder) {                                                                
-                    // 1. Guardar el pedido en el servidor.
-                    syncOrderResult = await this.env.pos.push_single_order(this.currentOrder);
+		let syncOrderResult, hasError;
 
-                    // 2. Facturar.
-                    if (this.shouldDownloadInvoice() && this.currentOrder.is_to_invoice()) {
-                        if (syncOrderResult.length) {
-                            await this.env.legacyActionManager.do_action(this.env.pos.invoiceReportAction, {
-                                additional_context: {
-                                    active_ids: [syncOrderResult[0].account_move],
-                                },
-                            });
-                        } else {
-                            throw { code: 401, message: 'Backend Invoice', data: { order: this.currentOrder } };
-                        }
-                    }
+		try {
+			this.env.services.ui.block();
 
-                    // 3. Post-procesar.
-                    if (syncOrderResult.length && this.currentOrder.wait_for_push_order()) {
-                        const postPushResult = await this._postPushOrderResolve(
-                            this.currentOrder,
-                            syncOrderResult.map((res) => res.id)
-                        );
-                        if (!postPushResult) {
-                            this.showPopup('ErrorPopup', {
-                                title: this.env._t('Error: no internet connection.'),
-                                body: this.env._t('Some, if not all, post-processing after syncing order failed.'),
-                            });
-                        }
-                    }
-                }
-            } catch (error) {
-                this.env.services.ui.unblock();
-                if (error.code == 700 || error.code == 701) {
-                    this.error = true;
-                }
+			// Si la orden NO es temporal, sincronizar con el servidor
+			if (!this.currentOrder.isTemporaryPrintOrder) {                                                               
+				// 1. Guardar el pedido en el servidor.
+				syncOrderResult = await this.env.pos.push_single_order(this.currentOrder);
 
-                if ('code' in error) {
-                    await this._handlePushOrderError(error);
-                } else {
-                    if (isConnectionError(error)) {
-                        this.showPopup('OfflineErrorPopup', {
-                            title: this.env._t('Connection Error'),
-                            body: this.env._t('Order is not synced. Check your internet connection'),
-                        });
-                    } else {
-                        throw error;
-                    }
-                }
-            } finally {
-                this.env.services.ui.unblock();
-                // Decidir cuál pantalla mostrar según si es con o sin precio
-                this.showScreen(this.nextScreen, { receiptWithoutPrice: this.currentOrder.isWithoutPrice });
-                this.env.pos.db.remove_unpaid_order(this.currentOrder);
+				// 2. Facturar.
+				if (this.shouldDownloadInvoice() && this.currentOrder.is_to_invoice()) {
+					if (syncOrderResult.length) {
+						await this.env.legacyActionManager.do_action(this.env.pos.invoiceReportAction, {
+							additional_context: {
+								active_ids: [syncOrderResult[0].account_move],
+							},
+						});
+					} else {
+						throw { code: 401, message: 'Backend Invoice', data: { order: this.currentOrder } };
+					}
+				}
 
-                if (!hasError && syncOrderResult && this.env.pos.db.get_orders().length) {
-                    const { confirmed } = await this.showPopup('ConfirmPopup', {
-                        title: this.env._t('Remaining unsynced orders'),
-                        body: this.env._t('There are unsynced orders. Do you want to sync these orders?'),
-                    });
-                    if (confirmed) {
-                        this.env.pos.push_orders();
-                    }
-                }
-            }
-        }
+				// 3. Post-procesar.
+				if (syncOrderResult.length && this.currentOrder.wait_for_push_order()) {
+					const postPushResult = await this._postPushOrderResolve(
+						this.currentOrder,
+						syncOrderResult.map((res) => res.id)
+					);
+					if (!postPushResult) {
+						this.showPopup('ErrorPopup', {
+							title: this.env._t('Error: no internet connection.'),
+							body: this.env._t('Some, if not all, post-processing after syncing order failed.'),
+						});
+					}
+				}
+			} else {
+				// Si la orden es temporal, imprimir sin sincronizar
+				this.showScreen(this.nextScreen, { receiptWithoutPrice: this.currentOrder.isWithoutPrice });
+			}
+		} catch (error) {
+			this.env.services.ui.unblock();
+			if (error.code == 700 || error.code == 701) {
+				this.error = true;
+			}
+
+			if ('code' in error) {
+				await this._handlePushOrderError(error);
+			} else {
+				if (isConnectionError(error)) {
+					this.showPopup('OfflineErrorPopup', {
+						title: this.env._t('Connection Error'),
+						body: this.env._t('Order is not synced. Check your internet connection'),
+					});
+				} else {
+					throw error;
+				}
+			}
+		} finally {
+			this.env.services.ui.unblock();
+			// Decidir cuál pantalla mostrar según si es con o sin precio
+			this.showScreen(this.nextScreen, { receiptWithoutPrice: this.currentOrder.isWithoutPrice });
+			this.env.pos.db.remove_unpaid_order(this.currentOrder);
+
+			if (!hasError && syncOrderResult && this.env.pos.db.get_orders().length) {
+				const { confirmed } = await this.showPopup('ConfirmPopup', {
+					title: this.env._t('Remaining unsynced orders'),
+					body: this.env._t('There are unsynced orders. Do you want to sync these orders?'),
+				});
+				if (confirmed) {
+					this.env.pos.push_orders();
+				}
+			}
+		}
+	}
+
 
         async _postPushOrderResolve(order, order_server_ids) {
             const res = await super._postPushOrderResolve(...arguments);
