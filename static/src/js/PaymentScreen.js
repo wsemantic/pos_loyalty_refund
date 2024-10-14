@@ -166,8 +166,10 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
 								title: this.env._t('Error: no internet connection.'),
 								body: this.env._t('Some, if not all, post-processing after syncing order failed.'),
 							});
-                    }
-                }
+                 
+						}
+					}
+				}
             } catch (error) {
                 this.env.services.ui.unblock();
                 if (error.code == 700 || error.code == 701) {
