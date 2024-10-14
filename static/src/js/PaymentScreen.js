@@ -111,10 +111,10 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 // Configurar para imprimir con precios
                 this.currentOrder.isWithoutPrice = false;
 
-                // Remover líneas de pago pendientes antes de finalizar la validación
+                /* Remover líneas de pago pendientes antes de finalizar la validación
                 for (let line of this.paymentLines) {
                     if (!line.is_done()) this.currentOrder.remove_paymentline(line);
-                }
+                }*/
                 await this._finalizeValidation();
             }
         }
