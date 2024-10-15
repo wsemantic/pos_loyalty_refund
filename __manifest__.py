@@ -24,6 +24,7 @@
             'pos_loyalty_refund/static/src/js/ReprintGiftReceiptButton.js',
             'pos_loyalty_refund/static/src/js/ReprintGiftReceiptScreen.js',
             'pos_loyalty_refund/static/src/js/TicketScreen.js',
+            'pos_loyalty_refund/static/src/js/models_pos_global_state.js',
             'pos_loyalty_refund/static/src/xml/GitftCardButton.xml',
             'pos_loyalty_refund/static/src/xml/OrderReceipt.xml',
             'pos_loyalty_refund/static/src/xml/ReceiptScreen.xml',
