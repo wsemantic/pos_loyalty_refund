@@ -1,10 +1,11 @@
 odoo.define("pos_loyalty_refund.PosGlobalState", function (require) {
     "use strict";
 
-    const PosModel = require("point_of_sale.models").PosModel;
+    const PosGlobalState = require('point_of_sale.models').PosGlobalState;
+    const models = require('point_of_sale.models');
 
-    const CustomPosGlobalState = (PosModel) =>
-        class extends PosModel {
+    const CustomPosGlobalState = (PosGlobalState) =>
+        class extends PosGlobalState {
 
             // Sobrescribimos el método para cambiar el campo preseleccionado
             getDefaultSearchDetails() {
@@ -15,6 +16,5 @@ odoo.define("pos_loyalty_refund.PosGlobalState", function (require) {
             }
         };
 
-    // Extender el modelo global del POS
-    require('point_of_sale.models').PosModel = CustomPosGlobalState;
+    models.PosGlobalState = CustomPosGlobalState(PosGlobalState);
 });
