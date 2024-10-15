@@ -1,4 +1,4 @@
-odoo.define("mi_modulo_a_medida.TicketScreen", function (require) {
+odoo.define("pos_loyalty_refund.TicketScreen", function (require) {
     "use strict";
 
     const TicketScreen = require("point_of_sale.TicketScreen");
@@ -6,6 +6,14 @@ odoo.define("mi_modulo_a_medida.TicketScreen", function (require) {
 
     const CustomTicketScreen = (TicketScreen) =>
         class extends TicketScreen {
+			
+			getDefaultSearchDetails() {
+                return {
+                    fieldName: 'SIMPLIFIED_INVOICE',  // Campo preseleccionado
+                    searchTerm: '',  // El término de búsqueda inicial está vacío
+                };
+            }
+			
             _getSearchFields() {
                 const fields = super._getSearchFields();
 
