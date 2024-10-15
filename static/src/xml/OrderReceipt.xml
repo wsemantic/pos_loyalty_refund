@@ -89,6 +89,17 @@
                 <span  >Saldo Tarj. :<t t-esc="env.pos.format_currency(giftCard.balance)"/></span>
             </div>
         </xpath>
+		
+		<xpath expr="//div[hasclass('before-footer')]" position="after">
+			<br />
+			<div class="pos-receipt-center-align">
+				<!-- Aquí añadimos el código de barras -->
+				<div class="barcode">
+					<img t-att-src="'/report/barcode/EAN13/' + receipt.l10n_es_unique_id"/>
+				</div>
+			</div>
+		</xpath>
+
     </t>
     
     <t t-name="OrderLinesReceipt" t-inherit="point_of_sale.OrderLinesReceipt" t-inherit-mode="extension" owl="1">
