@@ -92,14 +92,16 @@
 		
 		<xpath expr="//div[hasclass('before-footer')]" position="after">
 			<br />
-			<div class="pos-receipt-center-align">
+			<div class="pos-receipt-center-align" style="width: 100%; display: block; text-align: center; margin-top: 10px;">
 				<!-- Ajustamos el tamaño y la alineación del código de barras -->
-				<div class="barcode" style="text-align: center; margin-top: 10px;">
+				<div class="barcode" style="width: 100%; display: block;">
 					<img t-att-src="'/report/barcode/EAN13/' + receipt.l10n_es_unique_id"
-						 style="width: 100%; height: 50px;" />
+						 style="width: 100%; height: 50px;"/>
 				</div>
 			</div>
 		</xpath>
+
+
 
 
 
