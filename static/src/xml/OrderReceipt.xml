@@ -95,7 +95,7 @@
 			<div class="pos-receipt-center-align">
 				<!-- Ajustamos el tamaño y la alineación del código de barras -->
 				<div class="barcode" style="text-align: center; margin-top: 10px;">
-					<img t-att-src="'/report/barcode/Code128/' + receipt.l10n_es_unique_id"
+					<img t-att-src="'/report/barcode/EAN13/' + receipt.l10n_es_unique_id"
 						 style="width: 100%; height: auto; padding: 0; margin: 0;" />
 				</div>
 			</div>
