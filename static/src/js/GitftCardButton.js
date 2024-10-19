@@ -20,7 +20,7 @@ odoo.define('pos_loyalty_refund.GitftCardButton', function(require) {
             var amount = Math.abs(this.env.pos.get_order().get_total_with_tax());
             let { confirmed, payload: amt } = await this.showPopup('TextInputPopup', {
                 title: this.env._t('Enter Amount'),
-                startingValue: amount,
+                startingValue: this.env.pos.format_currency_no_symbol(amount),
                 placeholder: this.env._t('Amount'),
             });
             if (confirmed) {
