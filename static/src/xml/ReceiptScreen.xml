@@ -32,5 +32,11 @@
         <xpath expr="//OrderReceipt[last()]" position="replace">
             <OrderReceipt order="currentOrder" printasgift="orderUiState.printGift || props.receiptWithoutPrice" />
         </xpath>
+        <xpath expr="//div[hasclass('pos-receipt-container')]" position="after">
+            <div class="current-order-receipt" style="display:none">
+                <OrderReceipt order="currentOrder" printasgift="false" />
+            </div>
+            <div class="current-order-gift-receipt" style="display:none"/>
+        </xpath>
     </t>
 </templates>

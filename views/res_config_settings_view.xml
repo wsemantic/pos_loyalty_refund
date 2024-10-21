@@ -11,6 +11,10 @@
                         <label for="gift_card_product_id" class="col-lg-4 o_light_label"/>
                         <field name="gift_card_product_id" string="Tarjeta Regalo Producto" domain="[('sale_ok', '=', True), ('detailed_type', '=', 'service')]"/>
                     </div>
+                    <div class="mt16 o_light_label">
+                        <label for="enable_second_print_with_price" class="col-lg-4 o_light_label"/>
+                        <field name="enable_second_print_with_price" string="Enable Second Print With Price"/>
+                    </div>
                 </div>
             </xpath>
         </field>
