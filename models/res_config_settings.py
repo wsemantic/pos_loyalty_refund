@@ -10,6 +10,7 @@ class ResConfigSettings(models.TransientModel):
     enable_second_print_with_price = fields.Boolean('Enable Second Print With Price', related='pos_config_id.enable_second_print_with_price', readonly=False)
     receipt_width = fields.Integer(
         string="Ancho del Recibo (px)",
+        default=300,
         related="pos_config_id.receipt_width",
         readonly=False,  # Permite editar el campo desde `res.config.settings`
         help="300 para impresoras de 80 mm. Modificalo a 220 para impresora de 58mm"
