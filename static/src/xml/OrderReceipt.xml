@@ -5,7 +5,7 @@
 		<!-- Ancho de recibo configurable -->
         <xpath expr="//div[@class='pos-receipt']" position="attributes">
             <attribute name="style">
-                width: <t t-esc="env.pos.config.receipt_width or 220"/>px;
+                width: <t t-esc="env.pos.config.receipt_width or 300"/>px;
             </attribute>
         </xpath>
         <xpath expr="//t[@t-if='!isTaxIncluded']" position="replace">

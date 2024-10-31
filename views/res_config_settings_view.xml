@@ -17,7 +17,7 @@
                     </div>
 					<div class="mt16 o_light_label">
 						<label for="receipt_width" class="col-lg-4 o_light_label">Ancho del Recibo (px)</label>
-						<field name="receipt_width" string="Ancho del Recibo (px)" placeholder="Ej: 300" />
+						<field name="receipt_width" string="Ancho del Recibo (px)" placeholder="Ej: 300" help="300 para impresoras de 80 mm. Modificalo a 220 para impresora de 58mm"/>
 					</div>					
                 </div>
             </xpath>
