@@ -21,7 +21,7 @@ odoo.define('pos_loyalty_refund.OrderReceipt', function (require) {
             }
 
             _applyReceiptWidth() {
-                const receiptWidth = this.env.pos.config.receipt_width || 220; // Valor por defecto
+                const receiptWidth = this.env.pos.config.receipt_width || 300; // Valor por defecto
                 const receiptContainer = this.el.querySelector('.pos-receipt');
                 
                 if (receiptContainer) {
