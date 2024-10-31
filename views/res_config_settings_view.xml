@@ -15,10 +15,10 @@
                         <label for="enable_second_print_with_price" class="col-lg-4 o_light_label"/>
                         <field name="enable_second_print_with_price" string="Enable Second Print With Price"/>
                     </div>
-                </div>
-				<div class="mt16 o_light_label">
-                    <label for="receipt_width" class="col-lg-4 o_light_label">Ancho del Recibo (px)</label>
-                    <field name="receipt_width" string="Ancho del Recibo (px)" placeholder="Ej: 300" />
+					<div class="mt16 o_light_label">
+						<label for="receipt_width" class="col-lg-4 o_light_label">Ancho del Recibo (px)</label>
+						<field name="receipt_width" string="Ancho del Recibo (px)" placeholder="Ej: 300" />
+					</div>					
                 </div>
             </xpath>
         </field>
