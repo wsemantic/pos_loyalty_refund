@@ -14,21 +14,27 @@ odoo.define('pos_loyalty_refund.OrderReceipt', function (require) {
     // Definición para ajustar el ancho del recibo
     const OrderReceiptWidth = GiftOrderReceipt =>
         class extends GiftOrderReceipt {
-            // Método que aplica el ancho configurable en el recibo
             mounted() {
                 super.mounted();
                 this._applyReceiptWidth();
             }
 
             _applyReceiptWidth() {
-                const receiptWidth = this.env.pos.config.receipt_width || 300; // Valor por defecto
-                const receiptContainer = this.el.querySelector('.pos-receipt');
+                const receiptWidth = this.env.pos.config.receipt_width || 300; // Valor por defecto de 300 px
                 
+                // Aplicar el ancho a .pos y .pos-receipt-container
+                const posContainer = this.el.closest('.pos');
+                const receiptContainer = this.el.closest('.pos-receipt-container');
+
+                if (posContainer) {
+                    posContainer.style.width = `${receiptWidth}px`;
+                }
                 if (receiptContainer) {
                     receiptContainer.style.width = `${receiptWidth}px`;
                 }
             }
         };
+
 
     // Registro de las extensiones en el POS en el orden adecuado
     Registries.Component.extend(OrderReceipt, GiftOrderReceipt); // Primero, aplicar GiftOrderReceipt
