@@ -144,6 +144,17 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                     }
                 }
             }
+            if (Object.keys(result.gc_reward_line).length){
+                for (const line of order.get_orderlines()) {
+                    if(line.is_reward_line) {
+                        const gclines = Object.values(result.gc_reward_line).filter((value) => value.price.toFixed(2) === line.price.toFixed(2));
+                        if(gclines.length){
+                            line.gift_card_code = gclines[0].gift_card_code
+                            line.gift_card_balance = gclines[0].gift_card_balance
+                        }
+                    }
+                }
+            }
             return res;
         }
     };

@@ -113,7 +113,12 @@ class PosOrder(models.Model):
                 'gift_card_id': line.gift_card_id.id,
                 'gift_card_code': line.gift_card_id.code,
                 'gift_card_balance': line.gift_card_id.points,
-             } for line in self.lines if line.gift_card_id.exists()}
+             } for line in self.lines if line.gift_card_id.exists()},
+             'gc_reward_line': { line.id: {
+                'price': line.price_unit,
+                'gift_card_code': line.coupon_id.code,
+                'gift_card_balance': line.coupon_id.points,
+             } for line in self.lines if line.coupon_id.exists() and line.reward_id.program_type == 'gift_card'}
         }
 
 
