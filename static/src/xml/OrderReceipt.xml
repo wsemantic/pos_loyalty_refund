@@ -44,10 +44,10 @@
                 CHANGE
                 <span t-esc="env.pos.format_currency(receipt.change)" class="pos-receipt-right-align" />
             </div>
-			<div class="pos-receipt-open-drawer">
-				<!-- Comando de apertura del cajón -->
+			<!--<div class="pos-receipt-open-drawer">
+				Comando de apertura del cajón 
 				<span t-raw="'\x1B\x70\x00\x19\xFA'" />
-			</div>
+			</div>-->
         </xpath>
 
         <xpath expr="//t[@t-if='receipt.total_discount']" position="replace">
