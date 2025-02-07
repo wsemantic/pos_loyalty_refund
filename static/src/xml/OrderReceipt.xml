@@ -104,9 +104,6 @@
 				</div>
 			</div>
 		</xpath>
-
-
-
     </t>
     
     <t t-name="OrderLinesReceipt" t-inherit="point_of_sale.OrderLinesReceipt" t-inherit-mode="extension" owl="1">
