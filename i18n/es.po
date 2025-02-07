@@ -14,4 +14,4 @@ msgstr ""
 #: code:addons/pos_loyalty/static/src/xml/ControlButtons/PromoCodeButton.xml:0
 #, python-format
 msgid "Enter Code"
-msgstr "Pagar con T. Regalo"
+msgstr "Paga con T.Regalo"
