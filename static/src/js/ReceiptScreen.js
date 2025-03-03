@@ -13,18 +13,19 @@ odoo.define('pos_loyalty_refund.ReceiptScreen', function (require) {
             this.orderUiState.printClass = "fa fa-gift";
 
         }
-        changePrintGift(ev) {
+        async changePrintGift(ev) {
             this.orderUiState.printGift = !this.orderUiState.printGift;
-            this.orderUiState.printMessage = this.orderUiState.printGift ? "Print Normal Receipt": "Print Gift Receipt";
-            this.orderUiState.printClass = this.orderUiState.printGift ? "fa fa-print": "fa fa-gift";
-            setTimeout(() => {
-                this.printReceipt();
+            // this.orderUiState.printMessage = this.orderUiState.printGift ? "Print Normal Receipt": "Print Gift Receipt";
+            // this.orderUiState.printClass = this.orderUiState.printGift ? "fa fa-print": "fa fa-gift";
+            await setTimeout(async () => {
+                await this.printReceipt();
+                this.orderUiState.printGift = !this.orderUiState.printGift;
             }, 50);
         }
         async printReceipt() {
             const currentOrder = this.currentOrder;
             const isPrinted = await this._printReceipt();
-            if((this.props.receiptWithoutPrice || this.orderUiState.printGift) && this.env.pos.config.enable_second_print_with_price){
+            if(this.props.receiptWithoutPrice && this.env.pos.config.enable_second_print_with_price){
                 $('.current-order-gift-receipt').html($('.pos-receipt-container').html());
                 $('.pos-receipt-container').html($('.current-order-receipt').html());
                 await this._printReceipt();
