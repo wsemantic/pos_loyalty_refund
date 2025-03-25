@@ -15,6 +15,18 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
             this.validateOrderWithoutPrice = useAsyncLockedMethod(this.validateOrderWithoutPrice);
         }
         async validateOrderWithoutPrice(isForceValidate) {
+            const below_limit =
+                this.currentOrder.get_total_with_tax() <=
+                this.env.pos.config.l10n_es_simplified_invoice_limit;
+            if (this.env.pos.config.is_simplified_config) {
+                const order = this.currentOrder;
+                if (below_limit && !order.to_invoice) {
+                    await order.set_simple_inv_number();
+                } else {
+                    // Force invoice above limit. Online is needed.
+                    order.to_invoice = true;
+                }
+            }
             if(this.env.pos.config.cash_rounding) {
                 if(!this.env.pos.get_order().check_paymentlines_rounding()) {
                     this.showPopup('ErrorPopup', {
