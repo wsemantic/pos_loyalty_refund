@@ -150,7 +150,7 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
             if (Object.keys(result.updated_lines).length){
                 for (const line of order.get_orderlines()) {
                     if(this.env.pos.config.gift_card_product_id[0] == line.product.id) {
-                        const gclines = Object.values(result.updated_lines).filter((value) => value.price === line.price);
+                        const gclines = Object.values(result.updated_lines).filter((value) => value.price.toFixed(2) === line.price.toFixed(2));
                         line.gift_card_code = gclines[0].gift_card_code
                         line.gift_card_balance = gclines[0].gift_card_balance
                     }

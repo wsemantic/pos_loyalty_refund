@@ -60,7 +60,7 @@ class PosOrder(models.Model):
         
         new_coupons_dict = {coupon.id: coupon.points for coupon in new_coupons}
         for line in self.lines:
-            counpon_id = [counpon_id for counpon_id, points in new_coupons_dict.items() if points == line.price_unit]
+            counpon_id = [counpon_id for counpon_id, points in new_coupons_dict.items() if points == line.price_subtotal]
             if not line.gift_card_id and counpon_id and self.config_id.gift_card_product_id and line.product_id.id == self.config_id.gift_card_product_id.id:
                 # line.gift_card_id = counpon_id[0]
                 line.sudo().write({
