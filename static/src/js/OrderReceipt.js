@@ -3,6 +3,8 @@ odoo.define('pos_loyalty_refund.OrderReceipt', function (require) {
 
     const Registries = require('point_of_sale.Registries');
     const OrderReceipt = require('point_of_sale.OrderReceipt');
+    import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
+
     
     const GiftOrderReceipt = OrderReceipt => class extends OrderReceipt {
 

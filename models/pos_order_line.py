@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from odoo import fields, models
+from odoo import fields, models, api
 
 
 class POSOrderLine(models.Model):
     _inherit = 'pos.order.line'
 
     gift_card_id = fields.Many2one('loyalty.card', string="Card")
+    # gift_card_code = code = fields.Char(string="Code")
+    # gift_card_balance = fields.Float(string="Points")
 
     def _export_for_ui(self, orderline):
         result = super()._export_for_ui(orderline)
@@ -21,3 +23,9 @@ class POSOrderLine(models.Model):
             result["gift_card_balance"] = False
             
         return result
+
+    @api.model
+    def _load_pos_data_fields(self, config_id):
+        params = super()._load_pos_data_fields(config_id)
+        params += ['gift_card_id']
+        return params
