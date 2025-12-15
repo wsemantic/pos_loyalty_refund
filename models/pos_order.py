@@ -131,6 +131,14 @@ class PosOrder(models.Model):
                 and coupon.program_id.sudo().program_type not in ['gift_card', 'ewallet']
             )],
             'coupon_report': coupon_per_report,
+            'gift_card_line_mappings': {
+                line.id: {
+                    'gift_card_id': line.gift_card_id.id,
+                    'gift_card_code': line.gift_card_id.code,
+                    'gift_card_balance': line.gift_card_id.points,
+                }
+                for line in self.lines.sudo() if line.gift_card_id
+            }
         }
 
    
@@ -141,7 +149,7 @@ class PosOrder(models.Model):
                 'gift_card_id': line.gift_card_id.id,
                 'gift_card_code': line.gift_card_id.code,
                 'gift_card_balance': line.gift_card_id.points,
-             } for line in self.lines if line.gift_card_id.exists()},
+             } for line in self.lines.sudo() if line.gift_card_id.exists()},
              'gc_reward_line': { line.id: {
                 'price': line.price_unit,
                 'gift_card_code': line.coupon_id.code,

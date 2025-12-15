@@ -2,8 +2,8 @@
 <templates id="template" xml:space="preserve">
     <t t-name="pos_loyalty_refund.TicketScreen" t-inherit="point_of_sale.TicketScreen" t-inherit-mode="extension">
         <xpath expr="//div[hasclass('control-buttons')]//button[contains(@t-on-click, 'doPrint')]" position="after">
-            <button class="control-button btn btn-light btn-lg lh-lg flex-grow-1 flex-shrink-1" t-on-click="() => doPrint.call(_selectedSyncedOrder)">
-                <i t-attf-class="fa {{doPrint.status === 'loading' ? 'fa-fw fa-spin fa-circle-o-notch' : 'fa-print'}} me-1" />Imprimir Tarjeta Regalo
+            <button class="control-button btn btn-light btn-lg lh-lg flex-grow-1 flex-shrink-1" t-on-click="() => doGPrint.call(_selectedSyncedOrder)">
+                <i t-attf-class="fa {{doGPrint.status === 'loading' ? 'fa-fw fa-spin fa-circle-o-notch' : 'fa-print'}} me-1" />Imprimir Tarjeta Regalo
             </button>
         </xpath>
     </t>

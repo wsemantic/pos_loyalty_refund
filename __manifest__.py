@@ -17,28 +17,8 @@
     },
     'assets': {
         'point_of_sale._assets_pos': [
-            'pos_loyalty_refund/static/src/components/**/*',
+            'pos_loyalty_refund/static/src/overrides/**/*',
         ],
     },
-    #  "assets":{
-    #     'point_of_sale.assets': [
-    #         'pos_loyalty_refund/static/src/js/GitftCardButton.js',
-    #         'pos_loyalty_refund/static/src/js/Orderline.js',
-    #         'pos_loyalty_refund/static/src/js/PaymentScreen.js',
-    #         'pos_loyalty_refund/static/src/js/ReceiptScreen.js',
-    #         'pos_loyalty_refund/static/src/js/ReprintGiftReceiptButton.js',
-    #         'pos_loyalty_refund/static/src/js/ReprintGiftReceiptScreen.js',
-    #         'pos_loyalty_refund/static/src/js/TicketScreen.js',
-    #         'pos_loyalty_refund/static/src/js/models_pos_global_state.js',
-    #         'pos_loyalty_refund/static/src/xml/GitftCardButton.xml',
-    #         'pos_loyalty_refund/static/src/xml/OrderReceipt.xml',
-    #         'pos_loyalty_refund/static/src/xml/ReceiptScreen.xml',
-    #         'pos_loyalty_refund/static/src/xml/ReprintGiftReceiptButton.xml',
-    #         'pos_loyalty_refund/static/src/xml/ReprintGiftReceiptScreen.xml',
-    #         'pos_loyalty_refund/static/src/xml/TicketScreen.xml',
-    #         'pos_loyalty_refund/static/src/xml/PaymentScreen.xml',
-    #         'pos_loyalty_refund/static/src/scss/custom_receipt.scss',
-    #     ]
-    #  },
     "installable": True,
 }
