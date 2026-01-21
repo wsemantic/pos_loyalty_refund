@@ -14,6 +14,23 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
             useListener('validate-order-without-price', () => this.validateOrderWithoutPrice(false));
             this.validateOrderWithoutPrice = useAsyncLockedMethod(this.validateOrderWithoutPrice);
         }
+        async _isOrderValid(isForceValidate) {
+            const order = this.currentOrder;
+            const giftCardProduct = this.env.pos.config.gift_card_product_id;
+            if (giftCardProduct) {
+                const giftCardLines = order.get_orderlines().filter(line => line.product.id === giftCardProduct[0]);
+                for (const line of giftCardLines) {
+                    if (!line.eWalletGiftCardProgram) {
+                        this.showPopup('ErrorPopup', {
+                            title: this.env._t('Gift Card Error'),
+                            body: this.env._t('A gift card line is missing its loyalty program. Please remove and re-add it.'),
+                        });
+                        return false;
+                    }
+                }
+            }
+            return super._isOrderValid(isForceValidate);
+        }
         async validateOrderWithoutPrice(isForceValidate) {
             const below_limit =
                 this.currentOrder.get_total_with_tax() <=
@@ -110,17 +127,28 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                             body: this.env._t('Order is not synced. Check your internet connection'),
                         });
                     } else {
-                        throw error;
+                        this.error = true;
+                        if (error.message && error.message.body) {
+                            this.showPopup('ErrorPopup', {
+                                title: error.message.title || this.env._t('Error'),
+                                body: error.message.body,
+                            });
+                        } else {
+                            throw error;
+                        }
                     }
                 }
             } finally {
                 this.env.services.ui.unblock()
-                // Always show the next screen regardless of error since pos has to
-                // continue working even offline.
-                this.showScreen(this.nextScreen, {receiptWithoutPrice: true});
-                // Remove the order from the local storage so that when we refresh the page, the order
-                // won't be there
-                this.env.pos.db.remove_unpaid_order(this.currentOrder);
+                if (!this.error) {
+                    // Always show the next screen regardless of error since pos has to
+                    // continue working even offline.
+                    this.showScreen(this.nextScreen, { receiptWithoutPrice: true });
+                    // Remove the order from the local storage so that when we refresh the page, the order
+                    // won't be there
+                    this.env.pos.db.remove_unpaid_order(this.currentOrder);
+                }
+                this.error = false;
 
                 // Ask the user to sync the remaining unsynced orders.
                 if (!hasError && syncOrderResult && this.env.pos.db.get_orders().length) {
@@ -147,20 +175,29 @@ odoo.define('pos_loyalty_refund.PaymentScreen', function (require) {
                 args: [order_server_ids],
                 kwargs: { context: session.user_context },
             });
-            if (Object.keys(result.updated_lines).length){
+            if (result && result.updated_lines && Object.keys(result.updated_lines).length) {
                 for (const line of order.get_orderlines()) {
-                    if(this.env.pos.config.gift_card_product_id[0] == line.product.id) {
+                    if (this.env.pos.config.gift_card_product_id && this.env.pos.config.gift_card_product_id[0] == line.product.id) {
                         const gclines = Object.values(result.updated_lines).filter((value) => value.price.toFixed(2) === line.price.toFixed(2));
-                        line.gift_card_code = gclines[0].gift_card_code
-                        line.gift_card_balance = gclines[0].gift_card_balance
+                        if (gclines.length > 0) {
+                            line.gift_card_code = gclines[0].gift_card_code
+                            line.gift_card_balance = gclines[0].gift_card_balance
+                        } else {
+                            throw {
+                                message: {
+                                    title: this.env._t('Gift Card Error'),
+                                    body: this.env._t('The gift card could not be created for the line with price ') + line.price,
+                                }
+                            };
+                        }
                     }
                 }
             }
-            if (Object.keys(result.gc_reward_line).length){
+            if (result && result.gc_reward_line && Object.keys(result.gc_reward_line).length) {
                 for (const line of order.get_orderlines()) {
-                    if(line.is_reward_line) {
+                    if (line.is_reward_line) {
                         const gclines = Object.values(result.gc_reward_line).filter((value) => value.price.toFixed(2) === line.price.toFixed(2));
-                        if(gclines.length){
+                        if (gclines.length) {
                             line.gift_card_code = gclines[0].gift_card_code
                             line.gift_card_balance = gclines[0].gift_card_balance
                         }

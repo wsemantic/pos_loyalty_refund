@@ -1,4 +1,4 @@
-odoo.define('pos_loyalty_refund.GitftCardButton', function(require) {
+odoo.define('pos_loyalty_refund.GitftCardButton', function (require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
@@ -27,8 +27,8 @@ odoo.define('pos_loyalty_refund.GitftCardButton', function(require) {
                 if (amt !== '') {
                     const linkedProgramIds = this.env.pos.productId2ProgramIds[gift_card_product.id] || [];
                     const linkedPrograms = linkedProgramIds.map(id => this.env.pos.program_by_id[id]);
+                    let selectedProgram = null;
                     if (linkedPrograms.length > 1) {
-                        let selectedProgram = null;
                         const { confirmed, payload: program } = await this.showPopup('SelectionPopup', {
                             title: this.env._t('Select program'),
                             list: linkedPrograms.map((program) => ({
@@ -39,21 +39,26 @@ odoo.define('pos_loyalty_refund.GitftCardButton', function(require) {
                         });
                         if (confirmed) {
                             selectedProgram = program;
+                        } else {
+                            return;
                         }
-                        return order.add_product(gift_card_product, {
-                            quantity: 1,
-                            price: amt,
-                            lst_price: amt,
-                            eWalletGiftCardProgram: selectedProgram,
-                            // is_reward_line: true,
+                    } else if (linkedPrograms.length === 1) {
+                        selectedProgram = linkedPrograms[0];
+                    }
+
+                    if (!selectedProgram) {
+                        this.showPopup('ErrorPopup', {
+                            title: this.env._t('Error'),
+                            body: this.env._t('No loyalty program found for this gift card product.'),
                         });
-                    } 
+                        return;
+                    }
+
                     return order.add_product(gift_card_product, {
                         quantity: 1,
                         price: amt,
                         lst_price: amt,
-                        // eWalletGiftCardProgram: selectedProgram,
-                        // is_reward_line: true,
+                        eWalletGiftCardProgram: selectedProgram,
                     });
                 }
             }
