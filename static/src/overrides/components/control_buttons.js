@@ -2,6 +2,7 @@ import { _t } from "@web/core/l10n/translation";
 import { NumberPopup } from "@point_of_sale/app/utils/input_popups/number_popup";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { ControlButtons } from "@point_of_sale/app/screens/product_screen/control_buttons/control_buttons";
+import { SelectionPopup } from "@point_of_sale/app/utils/input_popups/selection_popup";
 import { ask, makeAwaitable } from "@point_of_sale/app/store/make_awaitable_dialog";
 import { formatCurrency } from "@point_of_sale/app/models/utils/currency";
 import { TextInputPopup } from "@point_of_sale/app/utils/input_popups/text_input_popup";
@@ -41,7 +42,17 @@ patch(ControlButtons.prototype, {
             }
             return Number.parseFloat(priceWithoutTax.toFixed(2));
         };
-        console.log(this.pos.config.gift_card_product_id)
+        const giftCardProductId = Array.isArray(this.pos.config.gift_card_product_id)
+            ? this.pos.config.gift_card_product_id[0]
+            : this.pos.config.gift_card_product_id;
+        const giftCardProduct = this.pos.models["product.product"].get(giftCardProductId);
+        if (!giftCardProduct) {
+            this.dialog.add(AlertDialog, {
+                title: _t("Gift card product not found"),
+                body: _t("Check the POS configuration and reload the session."),
+            });
+            return;
+        }
         this.dialog.add(NumberPopup, {
             title: _t("Enter Amount"),
             startingValue: this.env.utils.formatCurrency(amount, false),
@@ -50,10 +61,10 @@ patch(ControlButtons.prototype, {
             getPayload: async (num) => {
                 const enteredAmount = parseAmount(num);
                 var vals = {
-                    product_id: this.pos.config.gift_card_product_id,
+                    product_id: giftCardProduct,
                     // The popup amount is meant to be the final amount to refund.
                     // Convert it to tax-excluded unit price only when taxes are excluded.
-                    price_unit: computeTaxExcludedPrice(this.pos.config.gift_card_product_id, enteredAmount)
+                    price_unit: computeTaxExcludedPrice(giftCardProduct, enteredAmount)
                 };
                 if (!Number.isFinite(vals.price_unit)) {
                     return;
