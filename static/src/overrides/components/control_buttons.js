@@ -11,6 +11,36 @@ patch(ControlButtons.prototype, {
     async onClickGiftCard() {
         const order = this.pos.get_order();
         var amount = Math.abs(this.pos.get_order().get_total_with_tax());
+        const parseAmount = (value) => {
+            if (typeof value === "number") {
+                return value;
+            }
+            const normalizedValue = String(value ?? "")
+                .replace(/\s/g, "")
+                .replace(/[^\d,.-]/g, "")
+                .replace(/,(?=\d{1,2}$)/, ".")
+                .replace(/,/g, "");
+            return Number.parseFloat(normalizedValue);
+        };
+        const getProductTaxes = (product) => {
+            const taxes = product?.taxes_id || [];
+            const taxModel = this.pos.models["account.tax"];
+            return taxes
+                .map((tax) => (typeof tax === "number" ? taxModel?.get(tax) : tax))
+                .filter(Boolean);
+        };
+        const computeTaxExcludedPrice = (product, priceWithTax) => {
+            const taxes = getProductTaxes(product);
+            let priceWithoutTax = priceWithTax;
+            const excludedPercentTaxes = taxes.filter(
+                (tax) => tax.amount_type === "percent" && !tax.price_include
+            );
+            if (excludedPercentTaxes.length) {
+                const totalPercent = excludedPercentTaxes.reduce((sum, tax) => sum + tax.amount, 0);
+                priceWithoutTax = priceWithTax / (1 + totalPercent / 100);
+            }
+            return Number.parseFloat(priceWithoutTax.toFixed(2));
+        };
         console.log(this.pos.config.gift_card_product_id)
         this.dialog.add(NumberPopup, {
             title: _t("Enter Amount"),
@@ -18,10 +48,16 @@ patch(ControlButtons.prototype, {
             formatDisplayedValue: (x) => `${this.pos.currency.symbol} ${x}`,
             placeholder: _t("Amount"),
             getPayload: async (num) => {
+                const enteredAmount = parseAmount(num);
                 var vals = {
                     product_id: this.pos.config.gift_card_product_id,
-                    price_unit: parseFloat(num ?? "")
+                    // The popup amount is meant to be the final amount to refund.
+                    // Convert it to tax-excluded unit price only when taxes are excluded.
+                    price_unit: computeTaxExcludedPrice(this.pos.config.gift_card_product_id, enteredAmount)
                 };
+                if (!Number.isFinite(vals.price_unit)) {
+                    return;
+                }
                 var opt = {};
                 const product = vals.product_id;
                 const order = this.pos.get_order();
