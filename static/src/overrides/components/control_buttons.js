@@ -11,6 +11,17 @@ patch(ControlButtons.prototype, {
     async onClickGiftCard() {
         const order = this.pos.get_order();
         var amount = Math.abs(this.pos.get_order().get_total_with_tax());
+        const parseAmount = (value) => {
+            if (typeof value === "number") {
+                return value;
+            }
+            const normalizedValue = String(value ?? "")
+                .replace(/\s/g, "")
+                .replace(/[^\d,.-]/g, "")
+                .replace(/,(?=\d{1,2}$)/, ".")
+                .replace(/,/g, "");
+            return Number.parseFloat(normalizedValue);
+        };
         console.log(this.pos.config.gift_card_product_id)
         this.dialog.add(NumberPopup, {
             title: _t("Enter Amount"),
@@ -20,8 +31,11 @@ patch(ControlButtons.prototype, {
             getPayload: async (num) => {
                 var vals = {
                     product_id: this.pos.config.gift_card_product_id,
-                    price_unit: parseFloat(num ?? "")
+                    price_unit: parseAmount(num)
                 };
+                if (!Number.isFinite(vals.price_unit)) {
+                    return;
+                }
                 var opt = {};
                 const product = vals.product_id;
                 const order = this.pos.get_order();
