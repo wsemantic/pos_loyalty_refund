@@ -3,6 +3,21 @@
 import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
 import { patch } from "@web/core/utils/patch";
 
+
+const isGiftCardDebugEnabled = () => {
+    try {
+        return window?.localStorage?.getItem("pos_giftcard_debug") === "1";
+    } catch {
+        return false;
+    }
+};
+
+const debugGiftCard = (...args) => {
+    if (isGiftCardDebugEnabled()) {
+        console.log("[pos_loyalty_refund]", ...args);
+    }
+};
+
 patch(PaymentScreen.prototype, {
     async validateOrder(isForceValidate, basicReceipt = false) {
         if (!this.currentOrder) return;
@@ -44,18 +59,31 @@ patch(PaymentScreen.prototype, {
         try {
             if (order_server_ids && order_server_ids.length > 0) {
                 const giftCardData = await this.env.services.orm.call("pos.order", "get_giftcard_lines", [order_server_ids]);
+                debugGiftCard("RPC get_giftcard_lines", { order_server_ids, giftCardData });
 
-                if (giftCardData && giftCardData.updated_lines) {
-                    for (const [lineId, data] of Object.entries(giftCardData.updated_lines)) {
+                const lineMaps = [
+                    giftCardData?.updated_lines || {},
+                    giftCardData?.gc_reward_line || {},
+                ];
+                for (const sourceMap of lineMaps) {
+                    for (const [lineId, data] of Object.entries(sourceMap)) {
                         // lineId comes as string from keys
-                        const line = order.lines.find(l => l.server_id == lineId || l.id == lineId);
-                        if (line) {
-                            line.gift_card_id = {
-                                id: data.gift_card_id,
-                                code: data.gift_card_code,
-                                points: data.gift_card_balance
-                            };
+                        const line = order.lines.find((l) => l.server_id == lineId || l.id == lineId);
+                        if (!line || !data?.gift_card_code) {
+                            debugGiftCard("Skipping gift card mapping", { lineId, data, hasLine: !!line });
+                            continue;
                         }
+                        line.gift_card_id = {
+                            id: data.gift_card_id || line.gift_card_id?.id,
+                            code: data.gift_card_code,
+                            points: data.gift_card_balance || 0,
+                        };
+                        debugGiftCard("Mapped gift card line", {
+                            lineId,
+                            orderline_id: line.id,
+                            server_id: line.server_id,
+                            mapped: line.gift_card_id,
+                        });
                     }
                 }
             }
