@@ -7,16 +7,14 @@
     "license": "AGPL-3",
     "summary": "Custom POS Gift Card",
     "depends": [
-        'point_of_sale',
-        'pos_loyalty',
-        'product',
+        'point_of_sale','pos_loyalty','product'
     ],
-    "data":{
+    "data":[
         'data/sequence.xml',
         'data/gift_report.xml',
         'views/res_config_settings_view.xml',
         'views/etiqueta_producto.xml',
-    },
+    ],
     'assets': {
         'point_of_sale._assets_pos': [
             'pos_loyalty_refund/static/src/overrides/**/*',
