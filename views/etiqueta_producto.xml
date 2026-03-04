@@ -2,12 +2,18 @@
 <odoo>
     <template id="report_simple_label_dymo_custom" inherit_id="product.report_simple_label_dymo" priority="99">
         <!--
-            Avoid contains() to prevent xpath quirks on processed templates.
-            Match the original price node by exact class and keep a direct fallback.
+            Apply style override from a stable container node instead of matching
+            a specific inner price node that can change across inherited variants.
         -->
-        <xpath expr="//strong[@class='o_label_price_small'] | //div[@class='text-end']/strong" position="attributes">
-            <attribute name="class">o_label_price_medium</attribute>
-            <attribute name="style">font-size: 1.7em; margin-top: -5mm; display: inline-block;</attribute>
+        <xpath expr="//*[@t-att-style='padding_page']" position="inside">
+            <style>
+                .o_label_price_small,
+                .o_label_price_medium {
+                    font-size: 1.7em !important;
+                    margin-top: -5mm;
+                    display: inline-block;
+                }
+            </style>
         </xpath>
     </template>
 </odoo>
