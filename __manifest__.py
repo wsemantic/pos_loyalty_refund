@@ -7,7 +7,9 @@
     "license": "AGPL-3",
     "summary": "Custom POS Gift Card",
     "depends": [
-        'point_of_sale','pos_loyalty','product'
+        'point_of_sale',
+        'pos_loyalty',
+        'product',
     ],
     "data":{
         'data/sequence.xml',
