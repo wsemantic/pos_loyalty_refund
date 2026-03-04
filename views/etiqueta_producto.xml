@@ -2,10 +2,10 @@
 <odoo>
     <template id="report_simple_label_dymo_custom" inherit_id="product.report_simple_label_dymo" priority="99">
         <!--
-            QWeb template inheritance DOES support xpath.
-            Keep the selector simple and tied to the price block structure.
+            Avoid contains() to prevent xpath quirks on processed templates.
+            Match the original price node by exact class and keep a direct fallback.
         -->
-        <xpath expr="//div[contains(@class, 'text-end')]/strong" position="attributes">
+        <xpath expr="//strong[@class='o_label_price_small'] | //div[@class='text-end']/strong" position="attributes">
             <attribute name="class">o_label_price_medium</attribute>
             <attribute name="style">font-size: 1.7em; margin-top: -5mm; display: inline-block;</attribute>
         </xpath>
