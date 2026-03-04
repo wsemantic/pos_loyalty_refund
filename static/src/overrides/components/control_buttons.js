@@ -42,10 +42,13 @@ patch(ControlButtons.prototype, {
             }
             return Number.parseFloat(priceWithoutTax.toFixed(2));
         };
-        const giftCardProductId = Array.isArray(this.pos.config.gift_card_product_id)
-            ? this.pos.config.gift_card_product_id[0]
-            : this.pos.config.gift_card_product_id;
-        const giftCardProduct = this.pos.models["product.product"].get(giftCardProductId);
+        const configuredGiftCardProduct = this.pos.config.gift_card_product_id;
+        const giftCardProductId = Array.isArray(configuredGiftCardProduct)
+            ? configuredGiftCardProduct[0]
+            : configuredGiftCardProduct?.id || configuredGiftCardProduct;
+        const giftCardProduct =
+            (configuredGiftCardProduct && configuredGiftCardProduct.id && configuredGiftCardProduct) ||
+            this.pos.models["product.product"].get(giftCardProductId);
         if (!giftCardProduct) {
             this.dialog.add(AlertDialog, {
                 title: _t("Gift card product not found"),
