@@ -2,6 +2,10 @@
 
 from odoo import api, models
 from collections import defaultdict
+import logging
+
+
+_logger = logging.getLogger(__name__)
 
 
 class PosOrder(models.Model):
@@ -70,6 +74,16 @@ class PosOrder(models.Model):
             counpon_id = [counpon_id for counpon_id, points in new_coupons_dict.items() if points == line.price_subtotal]
             if not line.gift_card_id and counpon_id and self.config_id.gift_card_product_id and line.product_id.id == self.config_id.gift_card_product_id.id:
                 # line.gift_card_id = counpon_id[0]
+                _logger.info(
+                    "[pos_loyalty_refund] Assigning gift_card_id on line during confirm_coupon_programs | "
+                    "order_id=%s line_id=%s product_id=%s product_name=%s subtotal=%s candidate_card_id=%s",
+                    self.id,
+                    line.id,
+                    line.product_id.id,
+                    line.product_id.display_name,
+                    line.price_subtotal,
+                    counpon_id[0],
+                )
                 line.sudo().write({
                     'gift_card_id': counpon_id[0],
                 })
@@ -143,18 +157,59 @@ class PosOrder(models.Model):
 
    
     def get_giftcard_lines(self):
-        return {
-            'updated_lines': { line.id: {
+        order_lines = self.sudo().mapped('lines')
+        updated_lines = {
+            line.id: {
                 'price': line.price_unit,
                 'gift_card_id': line.gift_card_id.id,
                 'gift_card_code': line.gift_card_id.code,
                 'gift_card_balance': line.gift_card_id.points,
-             } for line in self.lines.sudo() if line.gift_card_id.exists()},
-             'gc_reward_line': { line.id: {
+            }
+            for line in order_lines
+            if line.gift_card_id.exists()
+        }
+        gc_reward_line = {
+            line.id: {
                 'price': line.price_unit,
+                'gift_card_id': line.coupon_id.id,
                 'gift_card_code': line.coupon_id.code,
                 'gift_card_balance': line.coupon_id.points,
-             } for line in self.lines if line.coupon_id.exists() and line.reward_id.program_type == 'gift_card'}
+            }
+            for line in order_lines
+            if line.coupon_id.exists() and (
+                line.reward_id.program_type == 'gift_card'
+                or line.coupon_id.program_id.program_type == 'gift_card'
+            )
+        }
+
+        debug_lines = [
+            {
+                'line_id': line.id,
+                'order_id': line.order_id.id,
+                'product_id': line.product_id.id,
+                'product_name': line.product_id.display_name,
+                'price_subtotal': line.price_subtotal,
+                'gift_card_id': line.gift_card_id.id if line.gift_card_id else False,
+                'gift_card_code': line.gift_card_id.code if line.gift_card_id else False,
+                'coupon_id': line.coupon_id.id if line.coupon_id else False,
+                'coupon_code': line.coupon_id.code if line.coupon_id else False,
+                'reward_program_type': line.reward_id.program_type if line.reward_id else False,
+                'coupon_program_type': line.coupon_id.program_id.program_type if line.coupon_id else False,
+            }
+            for line in order_lines
+        ]
+
+        _logger.info(
+            "[pos_loyalty_refund] get_giftcard_lines diagnostics | order_ids=%s updated_lines=%s gc_reward_line=%s",
+            self.ids,
+            list(updated_lines.keys()),
+            list(gc_reward_line.keys()),
+        )
+
+        return {
+            'updated_lines': updated_lines,
+            'gc_reward_line': gc_reward_line,
+            'debug_lines': debug_lines,
         }
 
 
