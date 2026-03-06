@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, models
+from odoo.tools import float_compare
 from collections import defaultdict
 import logging
 
@@ -69,25 +70,51 @@ class PosOrder(models.Model):
             for reward_code in coupon_data[coupon_new_id_map[coupon.id]].get('line_codes', []):
                 lines_per_reward_code[reward_code].coupon_id = coupon
         
-        new_coupons_dict = {coupon.id: coupon.points for coupon in new_coupons}
-        for line in self.lines:
-            counpon_id = [counpon_id for counpon_id, points in new_coupons_dict.items() if points == line.price_subtotal]
-            if not line.gift_card_id and counpon_id and self.config_id.gift_card_product_id and line.product_id.id == self.config_id.gift_card_product_id.id:
-                # line.gift_card_id = counpon_id[0]
+        # Link created gift cards to POS gift-card product lines.
+        # Important: points can be based on tax-included amount while line.price_subtotal is tax-excluded.
+        # Try matching against both subtotal and subtotal_incl with tolerance.
+        remaining_coupon_points = {coupon.id: coupon.points for coupon in new_coupons}
+        gift_card_product = self.config_id.gift_card_product_id
+        gift_lines = self.lines.filtered(
+            lambda l: not l.gift_card_id and gift_card_product and l.product_id.id == gift_card_product.id
+        )
+        for line in gift_lines:
+            matched_coupon_id = False
+            for coupon_id, points in list(remaining_coupon_points.items()):
+                same_subtotal = float_compare(abs(points), abs(line.price_subtotal), precision_rounding=0.01) == 0
+                same_subtotal_incl = float_compare(abs(points), abs(line.price_subtotal_incl), precision_rounding=0.01) == 0
+                if same_subtotal or same_subtotal_incl:
+                    matched_coupon_id = coupon_id
+                    break
+
+            if not matched_coupon_id and len(remaining_coupon_points) == 1:
+                # Last-card fallback to avoid losing relation when taxes/rounding make matching ambiguous.
+                matched_coupon_id = next(iter(remaining_coupon_points.keys()))
+
+            if matched_coupon_id:
                 _logger.info(
                     "[pos_loyalty_refund] Assigning gift_card_id on line during confirm_coupon_programs | "
-                    "order_id=%s line_id=%s product_id=%s product_name=%s subtotal=%s candidate_card_id=%s",
+                    "order_id=%s line_id=%s product_id=%s subtotal=%s subtotal_incl=%s matched_coupon_id=%s matched_points=%s",
                     self.id,
                     line.id,
                     line.product_id.id,
-                    line.product_id.display_name,
                     line.price_subtotal,
-                    counpon_id[0],
+                    line.price_subtotal_incl,
+                    matched_coupon_id,
+                    remaining_coupon_points[matched_coupon_id],
                 )
-                line.sudo().write({
-                    'gift_card_id': counpon_id[0],
-                })
-                del new_coupons_dict[counpon_id[0]]
+                line.sudo().write({'gift_card_id': matched_coupon_id})
+                del remaining_coupon_points[matched_coupon_id]
+            else:
+                _logger.info(
+                    "[pos_loyalty_refund] Could not match gift card line during confirm_coupon_programs | "
+                    "order_id=%s line_id=%s subtotal=%s subtotal_incl=%s remaining_coupon_points=%s",
+                    self.id,
+                    line.id,
+                    line.price_subtotal,
+                    line.price_subtotal_incl,
+                    remaining_coupon_points,
+                )
         
         # Send creation email
         new_coupons.with_context(action_no_send_mail=False)._send_creation_communication()
