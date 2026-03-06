@@ -60,6 +60,9 @@ patch(PaymentScreen.prototype, {
             if (order_server_ids && order_server_ids.length > 0) {
                 const giftCardData = await this.env.services.orm.call("pos.order", "get_giftcard_lines", [order_server_ids]);
                 debugGiftCard("RPC get_giftcard_lines", { order_server_ids, giftCardData });
+                if (!Object.keys(giftCardData?.updated_lines || {}).length && !Object.keys(giftCardData?.gc_reward_line || {}).length) {
+                    debugGiftCard("No gift card maps returned. Inspect debug_lines to trace source relations.", giftCardData?.debug_lines || []);
+                }
 
                 const lineMaps = [
                     giftCardData?.updated_lines || {},
