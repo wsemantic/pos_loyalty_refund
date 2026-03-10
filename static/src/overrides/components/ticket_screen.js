@@ -17,12 +17,10 @@ patch(TicketScreen.prototype, {
             const [dbOrder] = await this.orm.read(
                 "pos.order",
                 [order.server_id],
-                ["l10n_es_simplified_invoice_number", "l10n_es_unique_id"]
+                ["l10n_es_simplified_invoice_number"]
             );
-            const simplifiedInvoiceNumber = dbOrder?.l10n_es_simplified_invoice_number || dbOrder?.l10n_es_unique_id;
-            if (simplifiedInvoiceNumber) {
-                order.l10n_es_simplified_invoice_number = simplifiedInvoiceNumber;
-                order.l10n_es_unique_id = simplifiedInvoiceNumber;
+            if (dbOrder?.l10n_es_simplified_invoice_number) {
+                order.l10n_es_simplified_invoice_number = dbOrder.l10n_es_simplified_invoice_number;
             }
         }
         await this.pos.printReceipt({

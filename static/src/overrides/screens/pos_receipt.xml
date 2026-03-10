@@ -18,18 +18,18 @@
         </xpath>
 
         <xpath expr="//div[hasclass('before-footer')]" position="after">
-            <t t-set="simplifiedInvoiceNumber" t-value="this.simplifiedInvoiceNumber"/>
+            <t t-set="simplifiedInvoiceNumber" t-value="(receipt and receipt.l10n_es_simplified_invoice_number) or (headerData and headerData.l10n_es_simplified_invoice_number)"/>
             <t t-if="simplifiedInvoiceNumber">
-                    <div class="pos-receipt-center-align" style="margin-top: 8px;">
-                        <img
-                            t-att-src="'/report/barcode/Code128/' + simplifiedInvoiceNumber + '?width=600&amp;height=120&amp;quiet=0'"
-                            style="width: 100%; height: 32px; object-fit: contain;"
-                            alt="Simplified invoice barcode"
-                        />
-                        <div>
-                            <t t-esc="simplifiedInvoiceNumber"/>
-                        </div>
+                <div class="pos-receipt-center-align" style="margin-top: 8px;">
+                    <img
+                        t-att-src="'/report/barcode/Code128/' + simplifiedInvoiceNumber + '?width=600&amp;height=120&amp;quiet=0'"
+                        style="width: 100%; height: 32px; object-fit: contain;"
+                        alt="Simplified invoice barcode"
+                    />
+                    <div>
+                        <t t-esc="simplifiedInvoiceNumber"/>
                     </div>
+                </div>
             </t>
         </xpath>
     </t>
