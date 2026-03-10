@@ -17,14 +17,15 @@
                 </t>
         </xpath>
 
-        <xpath expr="//div[hasclass('before-footer')]" position="after">
+        <!-- Odoo 18 templates vary across receipt modes; inject in root to ensure it is always rendered. -->
+        <xpath expr="//div[hasclass('pos-receipt')]" position="inside">
             <t t-set="simplifiedInvoiceNumber" t-value="(receipt and receipt.l10n_es_simplified_invoice_number) or (headerData and headerData.l10n_es_simplified_invoice_number)"/>
             <t t-set="fallbackRef" t-value="(receipt and (receipt.pos_reference or receipt.name)) or (headerData and (headerData.pos_reference or headerData.name or headerData.barcode_debug_fallback_ref))"/>
             <t t-set="barcodeValue" t-value="simplifiedInvoiceNumber or fallbackRef"/>
             <t t-if="barcodeValue">
                 <div class="pos-receipt-center-align" style="margin-top: 8px;">
                     <img
-                        t-att-src="'/report/barcode/Code128/' + encodeURIComponent(barcodeValue) + '?width=600&amp;height=120&amp;quiet=0'"
+                        t-att-src="'/report/barcode/?barcode_type=Code128&amp;value=' + encodeURIComponent(barcodeValue) + '&amp;width=600&amp;height=120&amp;humanreadable=0&amp;quiet=0'"
                         style="width: 100%; height: 32px; object-fit: contain;"
                         alt="Simplified invoice barcode"
                     />
