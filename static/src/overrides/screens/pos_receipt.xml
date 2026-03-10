@@ -18,7 +18,7 @@
         </xpath>
 
         <xpath expr="//div[hasclass('before-footer')]" position="after">
-            <t t-if="receipt.l10n_es_unique_id">
+            <t t-if="receipt and receipt.l10n_es_unique_id">
                 <div class="pos-receipt-center-align" style="margin-top: 8px;">
                     <img
                         t-att-src="'/report/barcode/Code128/' + receipt.l10n_es_unique_id + '?width=600&amp;height=120&amp;quiet=0'"
