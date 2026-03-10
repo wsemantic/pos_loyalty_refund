@@ -2,11 +2,11 @@
     --wsem-pos-receipt-width: 300px;
 }
 
-.pos .pos-receipt-container,
-.pos .pos-receipt-container > div,
+/* Keep screen layout stable: only size the receipt itself, not full POS columns. */
 .pos .pos-receipt {
-    width: var(--wsem-pos-receipt-width) !important;
-    max-width: var(--wsem-pos-receipt-width) !important;
+    width: min(var(--wsem-pos-receipt-width), 100%) !important;
+    max-width: 100% !important;
+    margin: 0 auto;
 }
 
 .pos .pos-receipt .responsive-price,
@@ -19,7 +19,7 @@
 .pos .pos-receipt .pos-receipt-right-align,
 .pos .pos-receipt .price_display {
     white-space: nowrap;
-    min-width: 5.5em;
+    min-width: 6.2em;
     text-align: right;
 }
 
@@ -29,8 +29,7 @@
 
 .wsem-simplified-invoice-barcode img {
     width: 100%;
-    height: auto;
-    min-height: 54px;
+    height: 28px;
     display: block;
 }
 
@@ -41,11 +40,16 @@
     }
 
     html,
-    body,
-    .pos,
-    .pos-receipt-container,
-    .pos-receipt-container > div,
-    .pos-receipt {
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+    }
+
+    .pos .pos-receipt,
+    .pos .pos-receipt-container,
+    .pos .pos-receipt-container > div {
         width: var(--wsem-pos-receipt-width) !important;
         max-width: var(--wsem-pos-receipt-width) !important;
         margin: 0 !important;
@@ -53,5 +57,9 @@
         height: auto !important;
         min-height: 0 !important;
         overflow: visible !important;
+    }
+
+    .wsem-simplified-invoice-barcode img {
+        height: 24px;
     }
 }
