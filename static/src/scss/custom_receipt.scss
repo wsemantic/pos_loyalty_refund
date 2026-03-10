@@ -1,3 +1,31 @@
-.pos .pos-receipt-container > div {
-    width: 220px !important; /* Ajusta el ancho a 220px para impresoras de 58 mm */
+:root {
+    --wsem-pos-receipt-width: 300px;
+}
+
+.pos .pos-receipt-container,
+.pos .pos-receipt-container > div,
+.pos .pos-receipt {
+    width: var(--wsem-pos-receipt-width) !important;
+    max-width: var(--wsem-pos-receipt-width) !important;
+}
+
+@media print {
+    @page {
+        size: auto;
+        margin: 0;
+    }
+
+    html,
+    body,
+    .pos,
+    .pos-receipt-container,
+    .pos-receipt-container > div,
+    .pos-receipt {
+        width: var(--wsem-pos-receipt-width) !important;
+        max-width: var(--wsem-pos-receipt-width) !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+    }
 }
