@@ -3,9 +3,10 @@ import { patch } from "@web/core/utils/patch";
 
 patch(PosOrder.prototype, {
     export_for_printing(baseUrl, headerData) {
-        var json = super.export_for_printing(...arguments);
+        const json = super.export_for_printing(...arguments);
         json.gift_card_code = this.gift_card_code;
         json.gift_card_balance = this.gift_card_balance;
+        json.l10n_es_unique_id = this.l10n_es_unique_id || json.l10n_es_unique_id;
         return json;
     },
 });
