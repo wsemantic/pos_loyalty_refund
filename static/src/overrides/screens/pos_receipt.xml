@@ -17,19 +17,8 @@
                 </t>
         </xpath>
 
-        <!-- Keep it simple/safe: remove branded paragraph under receipt order data. -->
+        <!-- Minimal/safe cleanup to avoid template inheritance crashes. -->
         <xpath expr="//div[hasclass('pos-receipt-order-data')]/p" position="replace"/>
-
-        <!-- Remove empty contact row that only prints (). -->
-        <xpath expr="//div[hasclass('pos-receipt-contact')]/div[normalize-space(.)='()']" position="replace"/>
-
-        <!-- Remove tracking row in header contact block. -->
-        <xpath expr="//span[hasclass('tracking-number')]/.." position="replace"/>
-
-        <!-- Move order date next to simplified invoice number in header. -->
-        <xpath expr="//div[hasclass('simplified-invoice-number')]" position="after">
-            <xpath expr="//div[@id='order-date']" position="move"/>
-        </xpath>
 
         <!-- Place barcode before footer block to ensure it is included before printer cut markers. -->
         <xpath expr="//div[hasclass('before-footer')]" position="before">
