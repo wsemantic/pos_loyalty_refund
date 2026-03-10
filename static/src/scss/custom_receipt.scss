@@ -4,7 +4,7 @@
 
 /* Keep screen layout stable: only size the receipt itself, not full POS columns. */
 .pos .pos-receipt {
-    width: min(var(--wsem-pos-receipt-width), 100%) !important;
+    width: var(--wsem-pos-receipt-width) !important;
     max-width: 100% !important;
     margin: 0 auto;
 }
