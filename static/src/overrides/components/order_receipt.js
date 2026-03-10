@@ -35,13 +35,6 @@ patch(OrderReceipt.prototype, {
             return;
         }
 
-        // Remove empty parentheses lines that occasionally appear in the header.
-        for (const node of this.el.querySelectorAll("div, span, p")) {
-            if ((node.textContent || "").trim() === "()") {
-                node.remove();
-            }
-        }
-
         // Remove numeric-only line shown right after "Servido por ..." when present.
         const headerNodes = Array.from(this.el.querySelectorAll("div, p"));
         for (const node of headerNodes) {

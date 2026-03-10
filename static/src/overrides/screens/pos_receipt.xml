@@ -39,8 +39,4 @@
         </xpath>
     </t>
 
-    <!-- Remove empty parentheses row from receipt header contact block. -->
-    <t t-name="wsem_gift_card.ReceiptHeader" t-inherit="point_of_sale.ReceiptHeader" t-inherit-mode="extension">
-        <xpath expr="//div[hasclass('pos-receipt-contact')]/div[normalize-space()='()']" position="replace"/>
-    </t>
 </templates>
