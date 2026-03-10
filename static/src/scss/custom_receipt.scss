@@ -30,15 +30,15 @@
 }
 
 .wsem-simplified-invoice-barcode img {
-    width: 80%;
-    max-width: 80%;
+    width: auto;
+    max-width: 100%;
     margin: 0 auto;
     height: 28px;
     display: block;
 }
 
 .wsem-print-feed {
-    height: 16mm;
+    height: 24mm;
 }
 
 @media print {
@@ -65,7 +65,7 @@
         height: auto !important;
         min-height: 0 !important;
         overflow: visible !important;
-        padding-bottom: 4mm !important;
+        padding-bottom: 8mm !important;
     }
 
     .wsem-simplified-invoice-barcode img {
@@ -73,6 +73,6 @@
     }
 
     .wsem-print-feed {
-        height: 16mm;
+        height: 24mm;
     }
 }

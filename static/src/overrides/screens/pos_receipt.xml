@@ -17,13 +17,27 @@
                 </t>
         </xpath>
 
+        <!-- Keep it simple/safe: remove branded paragraph under receipt order data. -->
+        <xpath expr="//div[hasclass('pos-receipt-order-data')]/p" position="replace"/>
+
+        <!-- Remove empty contact row that only prints (). -->
+        <xpath expr="//div[hasclass('pos-receipt-contact')]/div[normalize-space(.)='()']" position="replace"/>
+
+        <!-- Remove tracking row in header contact block. -->
+        <xpath expr="//span[hasclass('tracking-number')]/.." position="replace"/>
+
+        <!-- Move order date next to simplified invoice number in header. -->
+        <xpath expr="//div[hasclass('simplified-invoice-number')]" position="after">
+            <xpath expr="//div[@id='order-date']" position="move"/>
+        </xpath>
+
         <!-- Place barcode before footer block to ensure it is included before printer cut markers. -->
         <xpath expr="//div[hasclass('before-footer')]" position="before">
             <t t-set="simplifiedInvoiceNumber" t-value="(receipt and receipt.l10n_es_simplified_invoice_number) or (props and props.data and props.data.headerData and props.data.headerData.l10n_es_simplified_invoice_number) or (headerData and headerData.l10n_es_simplified_invoice_number)"/>
             <t t-if="simplifiedInvoiceNumber">
                 <div class="pos-receipt-center-align wsem-simplified-invoice-barcode">
                     <img
-                        t-att-src="'/report/barcode/Code128/' + simplifiedInvoiceNumber + '?width=700&amp;height=110&amp;quiet=0'"
+                        t-att-src="'/report/barcode/Code128/' + simplifiedInvoiceNumber + '?width=560&amp;height=110&amp;quiet=0'"
                         alt="Simplified invoice barcode"
                     />
                     <div>
