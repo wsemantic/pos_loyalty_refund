@@ -47,5 +47,40 @@ patch(OrderReceipt.prototype, {
                 next.remove();
             }
         }
+
+        // Remove tracking reference and branded footer sentence when present.
+        const removablePattern = /tracking|tecnolog[ií]a\s+odoo|technology\s+odoo/i;
+        const removableNodes = Array.from(this.el.querySelectorAll("div, p, span, li"));
+        for (const node of removableNodes) {
+            const text = (node.textContent || "").trim();
+            if (text && removablePattern.test(text)) {
+                node.remove();
+            }
+        }
+
+        // Move date next to simplified invoice number in the header area.
+        const allNodes = Array.from(this.el.querySelectorAll("div, p, span, li"));
+        const simplifiedInvoiceNode = allNodes.find((node) => {
+            const text = (node.textContent || "").trim();
+            return /factura\s+simplificada|simplified\s+invoice/i.test(text);
+        });
+
+        const dateNode = allNodes.find((node) => {
+            const text = (node.textContent || "").trim();
+            return /^(fecha|date)\b/i.test(text);
+        });
+
+        if (simplifiedInvoiceNode && dateNode && simplifiedInvoiceNode !== dateNode) {
+            const existingWrapper = simplifiedInvoiceNode.closest(".wsem-simplified-invoice-meta");
+            if (existingWrapper) {
+                existingWrapper.appendChild(dateNode);
+            } else {
+                const wrapper = document.createElement("div");
+                wrapper.className = "wsem-simplified-invoice-meta";
+                simplifiedInvoiceNode.parentNode?.insertBefore(wrapper, simplifiedInvoiceNode);
+                wrapper.appendChild(simplifiedInvoiceNode);
+                wrapper.appendChild(dateNode);
+            }
+        }
     },
 });

@@ -23,7 +23,7 @@
             <t t-if="simplifiedInvoiceNumber">
                 <div class="pos-receipt-center-align wsem-simplified-invoice-barcode">
                     <img
-                        t-att-src="'/report/barcode/Code128/' + simplifiedInvoiceNumber + '?width=700&amp;height=110&amp;quiet=0'"
+                        t-att-src="'/report/barcode/Code128/' + simplifiedInvoiceNumber + '?width=560&amp;height=110&amp;quiet=0'"
                         alt="Simplified invoice barcode"
                     />
                     <div>
