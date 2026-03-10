@@ -48,9 +48,13 @@ patch(OrderReceipt.prototype, {
             }
         }
 
-        // Remove tracking reference and branded footer sentence when present.
-        const removablePattern = /tracking|tecnolog[ií]a\s+odoo|technology\s+odoo/i;
-        const removableNodes = Array.from(this.el.querySelectorAll("div, p, span, li"));
+        // Remove explicit tracking number row in header when available.
+        const trackingNumberNode = this.el.querySelector(".tracking-number");
+        trackingNumberNode?.closest("div")?.remove();
+
+        // Remove branded footer and POS order reference lines from the bottom block.
+        const removablePattern = /tecnolog[ií]a(\s+de)?\s+odoo|technology\s+of\s+odoo|^pedido\b|^order\b/i;
+        const removableNodes = Array.from(this.el.querySelectorAll(".pos-receipt-order-data div, .pos-receipt-order-data p"));
         for (const node of removableNodes) {
             const text = (node.textContent || "").trim();
             if (text && removablePattern.test(text)) {
@@ -58,29 +62,16 @@ patch(OrderReceipt.prototype, {
             }
         }
 
-        // Move date next to simplified invoice number in the header area.
-        const allNodes = Array.from(this.el.querySelectorAll("div, p, span, li"));
-        const simplifiedInvoiceNode = allNodes.find((node) => {
+        // Move receipt date to header right after simplified invoice number.
+        const simplifiedInvoiceNumberNode = this.el.querySelector(".simplified-invoice-number");
+        const dateNode = this.el.querySelector("#order-date") || Array.from(this.el.querySelectorAll(".pos-receipt-order-data div, .pos-receipt-order-data p")).find((node) => {
             const text = (node.textContent || "").trim();
-            return /factura\s+simplificada|simplified\s+invoice/i.test(text);
+            return /^(fecha|date)\b|\d{1,2}\/\d{1,2}\/\d{2,4}/i.test(text);
         });
 
-        const dateNode = allNodes.find((node) => {
-            const text = (node.textContent || "").trim();
-            return /^(fecha|date)\b/i.test(text);
-        });
-
-        if (simplifiedInvoiceNode && dateNode && simplifiedInvoiceNode !== dateNode) {
-            const existingWrapper = simplifiedInvoiceNode.closest(".wsem-simplified-invoice-meta");
-            if (existingWrapper) {
-                existingWrapper.appendChild(dateNode);
-            } else {
-                const wrapper = document.createElement("div");
-                wrapper.className = "wsem-simplified-invoice-meta";
-                simplifiedInvoiceNode.parentNode?.insertBefore(wrapper, simplifiedInvoiceNode);
-                wrapper.appendChild(simplifiedInvoiceNode);
-                wrapper.appendChild(dateNode);
-            }
+        if (simplifiedInvoiceNumberNode && dateNode) {
+            dateNode.classList.add("wsem-header-order-date");
+            simplifiedInvoiceNumberNode.insertAdjacentElement("afterend", dateNode);
         }
     },
 });
