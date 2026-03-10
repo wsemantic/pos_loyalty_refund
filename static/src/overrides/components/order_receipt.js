@@ -35,6 +35,16 @@ patch(OrderReceipt.prototype, {
             return;
         }
 
+        // Remove tracking number field shown in shipping labels.
+        this.el.querySelectorAll(".tracking-number").forEach((node) => node.remove());
+
+        // Remove empty placeholder node rendered as "()" after city.
+        this.el.querySelectorAll("div, p, span").forEach((node) => {
+            if ((node.textContent || "").trim() === "()") {
+                node.remove();
+            }
+        });
+
         // Remove numeric-only line shown right after "Servido por ..." when present.
         const headerNodes = Array.from(this.el.querySelectorAll("div, p"));
         for (const node of headerNodes) {
