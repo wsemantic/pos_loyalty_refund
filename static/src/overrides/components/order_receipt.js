@@ -47,5 +47,31 @@ patch(OrderReceipt.prototype, {
                 next.remove();
             }
         }
+
+        // Remove explicit tracking number row in header when available.
+        const trackingNumberNode = this.el.querySelector(".tracking-number");
+        trackingNumberNode?.closest("div")?.remove();
+
+        // Remove branded footer and POS order reference lines from the bottom block.
+        const removablePattern = /tecnolog[ií]a(\s+de)?\s+odoo|technology\s+of\s+odoo|^pedido\b|^order\b/i;
+        const removableNodes = Array.from(this.el.querySelectorAll(".pos-receipt-order-data div, .pos-receipt-order-data p"));
+        for (const node of removableNodes) {
+            const text = (node.textContent || "").trim();
+            if (text && removablePattern.test(text)) {
+                node.remove();
+            }
+        }
+
+        // Move receipt date to header right after simplified invoice number.
+        const simplifiedInvoiceNumberNode = this.el.querySelector(".simplified-invoice-number");
+        const dateNode = this.el.querySelector("#order-date") || Array.from(this.el.querySelectorAll(".pos-receipt-order-data div, .pos-receipt-order-data p")).find((node) => {
+            const text = (node.textContent || "").trim();
+            return /^(fecha|date)\b|\d{1,2}\/\d{1,2}\/\d{2,4}/i.test(text);
+        });
+
+        if (simplifiedInvoiceNumberNode && dateNode) {
+            dateNode.classList.add("wsem-header-order-date");
+            simplifiedInvoiceNumberNode.insertAdjacentElement("afterend", dateNode);
+        }
     },
 });
