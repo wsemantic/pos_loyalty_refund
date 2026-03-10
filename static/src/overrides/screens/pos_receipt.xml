@@ -16,5 +16,27 @@
                     </div>
                 </t>
         </xpath>
+
+        <!-- Place barcode before footer block to ensure it is included before printer cut markers. -->
+        <xpath expr="//div[hasclass('before-footer')]" position="before">
+            <t t-set="simplifiedInvoiceNumber" t-value="(receipt and receipt.l10n_es_simplified_invoice_number) or (props and props.data and props.data.headerData and props.data.headerData.l10n_es_simplified_invoice_number) or (headerData and headerData.l10n_es_simplified_invoice_number)"/>
+            <t t-if="simplifiedInvoiceNumber">
+                <div class="pos-receipt-center-align wsem-simplified-invoice-barcode">
+                    <img
+                        t-att-src="'/report/barcode/Code128/' + simplifiedInvoiceNumber + '?width=700&amp;height=110&amp;quiet=0'"
+                        alt="Simplified invoice barcode"
+                    />
+                    <div>
+                        <t t-esc="simplifiedInvoiceNumber"/>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+
+        <!-- Extra bottom feed to avoid cutter reaching before the final receipt lines on some drivers. -->
+        <xpath expr="//div[hasclass('pos-receipt-order-data')]" position="after">
+            <div class="wsem-print-feed"/>
+        </xpath>
     </t>
+
 </templates>
