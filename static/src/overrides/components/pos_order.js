@@ -14,6 +14,11 @@ patch(PosOrder.prototype, {
         json.gift_card_balance = this.gift_card_balance;
         json.l10n_es_simplified_invoice_number = simplifiedInvoiceNumber;
         json.l10n_es_unique_id = simplifiedInvoiceNumber;
+
+        json.headerData = json.headerData || {};
+        json.headerData.l10n_es_simplified_invoice_number = simplifiedInvoiceNumber;
+        json.headerData.l10n_es_unique_id = simplifiedInvoiceNumber;
+
         return json;
     },
 });

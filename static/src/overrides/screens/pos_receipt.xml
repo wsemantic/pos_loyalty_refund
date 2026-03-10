@@ -18,9 +18,8 @@
         </xpath>
 
         <xpath expr="//div[hasclass('before-footer')]" position="after">
-            <t t-if="receipt">
-                <t t-set="simplifiedInvoiceNumber" t-value="receipt.l10n_es_simplified_invoice_number || receipt.l10n_es_unique_id"/>
-                <t t-if="simplifiedInvoiceNumber">
+            <t t-set="simplifiedInvoiceNumber" t-value="this.simplifiedInvoiceNumber"/>
+            <t t-if="simplifiedInvoiceNumber">
                     <div class="pos-receipt-center-align" style="margin-top: 8px;">
                         <img
                             t-att-src="'/report/barcode/Code128/' + simplifiedInvoiceNumber + '?width=600&amp;height=120&amp;quiet=0'"
@@ -31,7 +30,6 @@
                             <t t-esc="simplifiedInvoiceNumber"/>
                         </div>
                     </div>
-                </t>
             </t>
         </xpath>
     </t>

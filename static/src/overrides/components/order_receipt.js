@@ -6,12 +6,35 @@ import { patch } from "@web/core/utils/patch";
 
 const DEFAULT_RECEIPT_WIDTH = 300;
 
+const pickSimplifiedInvoiceNumber = (sources) => {
+    for (const value of sources) {
+        if (value) {
+            return value;
+        }
+    }
+    return false;
+};
+
 patch(OrderReceipt.prototype, {
     setup() {
         super.setup(...arguments);
         const applyLayout = () => this._applyReceiptLayout();
         onMounted(applyLayout);
         onPatched(applyLayout);
+    },
+
+    get simplifiedInvoiceNumber() {
+        const data = this.props?.data || {};
+        const headerData = data.headerData || {};
+        const receipt = this.receipt || data.receipt || {};
+        return pickSimplifiedInvoiceNumber([
+            data.l10n_es_simplified_invoice_number,
+            data.l10n_es_unique_id,
+            headerData.l10n_es_simplified_invoice_number,
+            headerData.l10n_es_unique_id,
+            receipt.l10n_es_simplified_invoice_number,
+            receipt.l10n_es_unique_id,
+        ]);
     },
 
     _applyReceiptLayout() {
