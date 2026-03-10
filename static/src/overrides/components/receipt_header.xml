@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <!--
+        NOTE:
+        - This is a QWeb template extension, not a JS method/class.
+        - `t-name` is just an internal template identifier for this inherited patch.
+    -->
+    <t t-name="wsem_gift_card.ReceiptHeaderTrackingCleanup" t-inherit="point_of_sale.ReceiptHeader" t-inherit-mode="extension">
+        <!-- Remove tracking number wrapper block from receipt header. -->
+        <xpath expr="//span[hasclass('tracking-number')]/.." position="replace"/>
+
+        <!-- Remove the empty placeholder node rendered as () after city. -->
+        <xpath expr="//div[hasclass('pos-receipt-contact')]/div[normalize-space(text())='()']" position="replace"/>
+    </t>
+</templates>
