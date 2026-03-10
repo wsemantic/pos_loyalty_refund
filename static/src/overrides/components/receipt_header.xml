@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="wsem_gift_card.ReceiptHeaderCleanup" t-inherit="point_of_sale.ReceiptHeader" t-inherit-mode="extension">
+        <!-- Remove tracking number container when present. -->
+        <xpath expr="//span[hasclass('tracking-number')]/ancestor::div[1]" position="replace"/>
+
+        <!-- Remove empty placeholder node rendered as () after city. -->
+        <xpath expr="//div[hasclass('pos-receipt-contact')]/div[normalize-space(text())='()']" position="replace"/>
+    </t>
+</templates>

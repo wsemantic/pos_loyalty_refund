@@ -17,6 +17,7 @@
                 </t>
         </xpath>
 
+
         <!-- Minimal/safe cleanup to avoid template inheritance crashes. -->
         <xpath expr="//div[hasclass('pos-receipt-order-data')]/p" position="replace"/>
 
