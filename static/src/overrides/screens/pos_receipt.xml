@@ -17,8 +17,8 @@
                 </t>
         </xpath>
 
-        <!-- Place barcode right before order/date block so it is included before final metadata and cut. -->
-        <xpath expr="//div[hasclass('pos-receipt-order-data')]" position="before">
+        <!-- Place barcode before footer block to ensure it is included before printer cut markers. -->
+        <xpath expr="//div[hasclass('before-footer')]" position="before">
             <t t-set="simplifiedInvoiceNumber" t-value="(receipt and receipt.l10n_es_simplified_invoice_number) or (props and props.data and props.data.headerData and props.data.headerData.l10n_es_simplified_invoice_number) or (headerData and headerData.l10n_es_simplified_invoice_number)"/>
             <t t-if="simplifiedInvoiceNumber">
                 <div class="pos-receipt-center-align wsem-simplified-invoice-barcode">
@@ -26,14 +26,11 @@
                         t-att-src="'/report/barcode/Code128/' + simplifiedInvoiceNumber + '?width=700&amp;height=110&amp;quiet=0'"
                         alt="Simplified invoice barcode"
                     />
-                    <div class="wsem-simplified-invoice-number">
+                    <div>
                         <t t-esc="simplifiedInvoiceNumber"/>
                     </div>
                 </div>
             </t>
         </xpath>
-
-        <!-- Remove trailing 'Powered by Odoo' line to save paper and spacing. -->
-        <xpath expr="//div[hasclass('pos-receipt-order-data')]/following-sibling::div[1]" position="replace"/>
     </t>
 </templates>

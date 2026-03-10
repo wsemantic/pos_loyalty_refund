@@ -24,8 +24,7 @@
 }
 
 .wsem-simplified-invoice-barcode {
-    margin-top: 6px;
-    margin-bottom: 4px;
+    margin-top: 8px;
     page-break-inside: avoid;
     break-inside: avoid;
 }
@@ -34,13 +33,8 @@
     width: 80%;
     max-width: 80%;
     margin: 0 auto;
-    height: 24px;
+    height: 28px;
     display: block;
-}
-
-.wsem-simplified-invoice-number {
-    margin-top: 2px;
-    margin-bottom: 6px;
 }
 
 @media print {
@@ -70,6 +64,6 @@
     }
 
     .wsem-simplified-invoice-barcode img {
-        height: 20px;
+        height: 24px;
     }
 }
