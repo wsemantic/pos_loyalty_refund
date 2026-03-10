@@ -32,5 +32,15 @@
                 </div>
             </t>
         </xpath>
+
+        <!-- Extra bottom feed to avoid cutter reaching before the final receipt lines on some drivers. -->
+        <xpath expr="//div[hasclass('pos-receipt-order-data')]" position="after">
+            <div class="wsem-print-feed"/>
+        </xpath>
+    </t>
+
+    <!-- Remove empty parentheses row from receipt header contact block. -->
+    <t t-name="wsem_gift_card.ReceiptHeader" t-inherit="point_of_sale.ReceiptHeader" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('pos-receipt-contact')]/div[normalize-space()='()']" position="replace"/>
     </t>
 </templates>

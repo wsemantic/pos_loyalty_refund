@@ -37,6 +37,10 @@
     display: block;
 }
 
+.wsem-print-feed {
+    height: 10mm;
+}
+
 @media print {
     @page {
         size: auto;
@@ -65,5 +69,9 @@
 
     .wsem-simplified-invoice-barcode img {
         height: 24px;
+    }
+
+    .wsem-print-feed {
+        height: 10mm;
     }
 }
