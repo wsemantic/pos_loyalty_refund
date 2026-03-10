@@ -17,24 +17,18 @@
                 </t>
         </xpath>
 
-        <!-- Odoo 18 templates vary across receipt modes; inject in root to ensure it is always rendered. -->
+        <!-- Match gift-card barcode route style, but with simplified invoice number only. -->
         <xpath expr="//div[hasclass('pos-receipt')]" position="inside">
-            <t t-set="simplifiedInvoiceNumber" t-value="(receipt and receipt.l10n_es_simplified_invoice_number) or (headerData and headerData.l10n_es_simplified_invoice_number)"/>
-            <t t-set="fallbackRef" t-value="(receipt and (receipt.pos_reference or receipt.name)) or (headerData and (headerData.pos_reference or headerData.name or headerData.barcode_debug_fallback_ref))"/>
-            <t t-set="barcodeValue" t-value="simplifiedInvoiceNumber or fallbackRef"/>
-            <t t-if="barcodeValue">
+            <t t-set="simplifiedInvoiceNumber" t-value="(receipt and receipt.l10n_es_simplified_invoice_number) or (props and props.data and props.data.headerData and props.data.headerData.l10n_es_simplified_invoice_number) or (headerData and headerData.l10n_es_simplified_invoice_number)"/>
+            <t t-if="simplifiedInvoiceNumber">
                 <div class="pos-receipt-center-align" style="margin-top: 8px;">
                     <img
-                        t-att-src="'/report/barcode/?barcode_type=Code128&amp;value=' + encodeURIComponent(barcodeValue) + '&amp;width=600&amp;height=120&amp;humanreadable=0&amp;quiet=0'"
-                        style="width: 100%; height: 32px; object-fit: contain;"
+                        t-att-src="'/report/barcode/Code128/' + simplifiedInvoiceNumber + '?width=800&amp;height=200&amp;quiet=0'"
+                        style="width:100%;height:32px;object-fit:contain;"
                         alt="Simplified invoice barcode"
                     />
                     <div>
-                        <t t-esc="barcodeValue"/>
-                    </div>
-                    <div style="font-size: 10px; opacity: 0.8;">
-                        <t t-if="simplifiedInvoiceNumber">BARCODE SOURCE: FACTURA SIMPLIFICADA</t>
-                        <t t-else="">BARCODE SOURCE: REFERENCIA PEDIDO (DEBUG)</t>
+                        <t t-esc="simplifiedInvoiceNumber"/>
                     </div>
                 </div>
             </t>
