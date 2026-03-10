@@ -47,5 +47,6 @@ patch(OrderReceipt.prototype, {
                 next.remove();
             }
         }
+
     },
 });
