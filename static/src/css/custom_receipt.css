@@ -25,6 +25,8 @@
 
 .wsem-simplified-invoice-barcode {
     margin-top: 8px;
+    page-break-inside: avoid;
+    break-inside: avoid;
 }
 
 .wsem-simplified-invoice-barcode img {
