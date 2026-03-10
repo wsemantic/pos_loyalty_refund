@@ -21,10 +21,9 @@
         <xpath expr="//div[hasclass('pos-receipt')]" position="inside">
             <t t-set="simplifiedInvoiceNumber" t-value="(receipt and receipt.l10n_es_simplified_invoice_number) or (props and props.data and props.data.headerData and props.data.headerData.l10n_es_simplified_invoice_number) or (headerData and headerData.l10n_es_simplified_invoice_number)"/>
             <t t-if="simplifiedInvoiceNumber">
-                <div class="pos-receipt-center-align" style="margin-top: 8px;">
+                <div class="pos-receipt-center-align wsem-simplified-invoice-barcode">
                     <img
-                        t-att-src="'/report/barcode/Code128/' + simplifiedInvoiceNumber + '?width=800&amp;height=200&amp;quiet=0'"
-                        style="width:100%;height:32px;object-fit:contain;"
+                        t-att-src="'/report/barcode/Code128/' + simplifiedInvoiceNumber + '?width=1000&amp;height=280&amp;quiet=0'"
                         alt="Simplified invoice barcode"
                     />
                     <div>

@@ -9,6 +9,31 @@
     max-width: var(--wsem-pos-receipt-width) !important;
 }
 
+.pos .pos-receipt .responsive-price,
+.pos .pos-receipt .pos-receipt-amount {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.pos .pos-receipt .pos-receipt-right-align,
+.pos .pos-receipt .price_display {
+    white-space: nowrap;
+    min-width: 5.5em;
+    text-align: right;
+}
+
+.wsem-simplified-invoice-barcode {
+    margin-top: 8px;
+}
+
+.wsem-simplified-invoice-barcode img {
+    width: 100%;
+    height: auto;
+    min-height: 54px;
+    display: block;
+}
+
 @media print {
     @page {
         size: auto;
@@ -27,5 +52,6 @@
         padding: 0 !important;
         height: auto !important;
         min-height: 0 !important;
+        overflow: visible !important;
     }
 }
