@@ -30,7 +30,9 @@
 }
 
 .wsem-simplified-invoice-barcode img {
-    width: 100%;
+    width: 80%;
+    max-width: 80%;
+    margin: 0 auto;
     height: 28px;
     display: block;
 }
