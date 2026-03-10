@@ -17,6 +17,12 @@
                 </t>
         </xpath>
 
+        <!-- Remove tracking-number wrapper injected in receipt header (XPath/QWeb approach). -->
+        <xpath expr="//div[hasclass('pos-receipt-contact')]/div[span[hasclass('tracking-number')]]" position="replace"/>
+
+        <!-- Remove empty placeholder node rendered as () after city (XPath/QWeb approach). -->
+        <xpath expr="//div[hasclass('pos-receipt-contact')]/div[normalize-space()='()']" position="replace"/>
+
         <!-- Minimal/safe cleanup to avoid template inheritance crashes. -->
         <xpath expr="//div[hasclass('pos-receipt-order-data')]/p" position="replace"/>
 
