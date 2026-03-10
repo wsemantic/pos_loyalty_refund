@@ -17,6 +17,18 @@
                 </t>
         </xpath>
 
+        <!-- Remove tracking number row from header. -->
+        <xpath expr="//span[hasclass('tracking-number')]/.." position="replace"/>
+
+        <!-- Remove branded and POS reference lines from footer metadata block. -->
+        <xpath expr="//div[hasclass('pos-receipt-order-data')]/p[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZÁÉÍÓÚ', 'abcdefghijklmnopqrstuvwxyzáéíóú'), 'tecnología de odoo') or contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'technology of odoo')]" position="replace"/>
+        <xpath expr="//div[hasclass('pos-receipt-order-data')]/div[starts-with(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'pedido') or starts-with(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'order')]" position="replace"/>
+
+        <!-- Move the existing order date from footer metadata to header after simplified invoice number. -->
+        <xpath expr="//div[hasclass('simplified-invoice-number')]" position="after">
+            <xpath expr="//div[@id='order-date']" position="move"/>
+        </xpath>
+
         <!-- Place barcode before footer block to ensure it is included before printer cut markers. -->
         <xpath expr="//div[hasclass('before-footer')]" position="before">
             <t t-set="simplifiedInvoiceNumber" t-value="(receipt and receipt.l10n_es_simplified_invoice_number) or (props and props.data and props.data.headerData and props.data.headerData.l10n_es_simplified_invoice_number) or (headerData and headerData.l10n_es_simplified_invoice_number)"/>
