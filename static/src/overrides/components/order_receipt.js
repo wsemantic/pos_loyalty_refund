@@ -18,19 +18,14 @@ patch(OrderReceipt.prototype, {
         const receiptWidth = this.pos?.config?.receipt_width || DEFAULT_RECEIPT_WIDTH;
         const widthPx = `${receiptWidth}px`;
 
-        // CSS variable consumed by the stylesheet for both on-screen and printer output.
+        // Global variable consumed by stylesheet in both screen and print contexts.
         document.documentElement.style.setProperty("--wsem-pos-receipt-width", widthPx);
 
-        // Force current receipt node width to avoid scaling in browser-based printing.
-        if (this.el) {
+        // Keep this limited to the receipt root element only.
+        // Avoid traversing parent containers to prevent null container issues on reprints.
+        if (this.el instanceof HTMLElement) {
             this.el.style.width = widthPx;
             this.el.style.maxWidth = widthPx;
-        }
-
-        const container = this.el?.closest(".pos-receipt-container");
-        if (container) {
-            container.style.width = widthPx;
-            container.style.maxWidth = widthPx;
         }
     },
 });
