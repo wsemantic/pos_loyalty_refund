@@ -7,6 +7,8 @@
     width: var(--wsem-pos-receipt-width) !important;
     max-width: 100% !important;
     margin: 0 auto;
+    padding-left: 1.5mm;
+    box-sizing: border-box;
 }
 
 .pos .pos-receipt .responsive-price,
@@ -71,6 +73,8 @@
         height: auto !important;
         min-height: 0 !important;
         overflow: visible !important;
+        padding-left: 1.5mm !important;
+        box-sizing: border-box !important;
         padding-bottom: 8mm !important;
     }
 
