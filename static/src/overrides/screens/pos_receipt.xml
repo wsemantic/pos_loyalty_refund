@@ -17,7 +17,15 @@
                 </t>
         </xpath>
 
-		<xpath expr="//div[@id='order-date']" position="replace"/>
+        <xpath expr="//div[@id='order-date']" position="replace"/>
+
+        <xpath expr="//*[hasclass('customer-name')]" position="replace">
+            <t t-set="customerName" t-value="((receipt and receipt.headerData and receipt.headerData.partner and receipt.headerData.partner.name) or '')"/>
+            <div t-if="!customerName.toLowerCase().includes('simplifica')" class="customer-name">
+                <t t-esc="customerName"/>
+            </div>
+        </xpath>
+
         <!-- Place barcode before footer block to ensure it is included before printer cut markers. -->
         <xpath expr="//div[hasclass('before-footer')]" position="before">
             <t t-set="simplifiedInvoiceNumber" t-value="(receipt and receipt.l10n_es_simplified_invoice_number) or (props and props.data and props.data.headerData and props.data.headerData.l10n_es_simplified_invoice_number) or (headerData and headerData.l10n_es_simplified_invoice_number)"/>
@@ -27,10 +35,6 @@
                         t-att-src="'/report/barcode/Code128/' + simplifiedInvoiceNumber + '?width=560&amp;height=110&amp;quiet=0'"
                         alt="Simplified invoice barcode"
                     />
-                    <div class="simplified-invoice-number">
-                        <t t-esc="simplifiedInvoiceNumber"/>
-                    </div>
-
                 </div>
             </t>
         </xpath>
