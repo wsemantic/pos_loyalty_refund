@@ -11,8 +11,8 @@
         <xpath expr="//div[hasclass('simplified-invoice-number')]" position="replace">
             <div
                 class="simplified-invoice-number"
-                t-if="props.data.headerData and props.data.headerData.l10n_es_unique_id"
-                t-esc="props.data.headerData.l10n_es_unique_id"
+                t-if="props.data.l10n_es_unique_id"
+                t-esc="props.data.l10n_es_unique_id"
             />
         </xpath>
 
