@@ -43,30 +43,40 @@
 }
 
 @media print {
-    /* Ocultar el texto de Odoo por si el XML falla */
-    .pos-receipt-order-data p {
-        display: none !important;
+    @page {
+        size: auto;
+        margin: 0;
     }
 
-    /* Forzar eliminación de BRs si el XPath no se aplica */
-    .pos-receipt br {
-        content: "" !important;
+    html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        min-height: unset !important; // Volvemos a automático
+    }
+
+    .pos .pos-receipt {
+        width: var(--wsem-pos-receipt-width) !important;
+        height: auto !important; // Altura según el contenido
         display: block !important;
-        margin-bottom: 0 !important;
-        line-height: 0 !important;
+        overflow: visible !important;
+        
+        /* EL SECRETO: Usar un padding-bottom para el avance de papel, 
+           pero sin forzar un alto fijo al body */
+        padding-bottom: 40mm !important; 
+    }
+
+    /* Forzamos que los BR que el XML no haya cazado no ocupen espacio */
+    .pos-receipt br {
+        display: none !important;
         height: 0 !important;
     }
 
-    /* EL TRUCO DEL AVANCE: Añadir espacio después del último div */
-    .pos-receipt-order-data:last-child::after {
-        content: "";
-        display: block;
-        height: 50mm; /* Esto garantiza 5cm de papel blanco antes del corte */
-    }
-
-    /* Reset de altura */
-    html, body {
-        height: auto !important;
-        min-height: unset !important;
+    /* Pegamos el número de pedido al código de barras */
+    .wsem-simplified-invoice-barcode {
+        margin-top: 0 !important;
+        .simplified-invoice-number {
+            margin-top: -5px !important;
+        }
     }
 }
