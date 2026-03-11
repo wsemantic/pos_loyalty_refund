@@ -12,22 +12,22 @@ const debugBarcode = (...args) => {
 patch(PosOrder.prototype, {
     export_for_printing(baseUrl, headerData) {
         const json = super.export_for_printing(...arguments);
-        const simplifiedInvoiceNumber =
-            this.l10n_es_simplified_invoice_number ||
-            json.l10n_es_simplified_invoice_number;
+        const uniqueId =
+            this.l10n_es_unique_id ||
+            json.l10n_es_unique_id;
 
         json.gift_card_code = this.gift_card_code;
         json.gift_card_balance = this.gift_card_balance;
-        json.l10n_es_simplified_invoice_number = simplifiedInvoiceNumber;
+        json.l10n_es_unique_id = uniqueId;
 
         json.headerData = json.headerData || {};
-        json.headerData.l10n_es_simplified_invoice_number = simplifiedInvoiceNumber;
-		json.headerData.date = json.date;
+        json.headerData.l10n_es_unique_id = uniqueId;
+        json.headerData.date = json.date;
 
         debugBarcode("export_for_printing payload", {
             order_uid: this.uid,
             order_server_id: this.server_id,
-            simplifiedInvoiceNumber,
+            uniqueId,
             headerData: json.headerData,
         });
 

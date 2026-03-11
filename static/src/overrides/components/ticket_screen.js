@@ -23,19 +23,19 @@ patch(TicketScreen.prototype, {
     async printG(order) {
         debugBarcode("printG start", {
             server_id: order?.server_id,
-            l10n_es_simplified_invoice_number: order?.l10n_es_simplified_invoice_number,
+            l10n_es_unique_id: order?.l10n_es_unique_id,
             name: order?.name,
             pos_reference: order?.pos_reference,
         });
 
-        if (order && !order.l10n_es_simplified_invoice_number && order.server_id) {
+        if (order && !order.l10n_es_unique_id && order.server_id) {
             const [dbOrder] = await this.orm.read(
                 "pos.order",
                 [order.server_id],
-                ["l10n_es_simplified_invoice_number", "name", "pos_reference"]
+                ["l10n_es_unique_id", "name", "pos_reference"]
             );
-            if (dbOrder?.l10n_es_simplified_invoice_number) {
-                order.l10n_es_simplified_invoice_number = dbOrder.l10n_es_simplified_invoice_number;
+            if (dbOrder?.l10n_es_unique_id) {
+                order.l10n_es_unique_id = dbOrder.l10n_es_unique_id;
             }
             debugBarcode("printG orm.read pos.order", dbOrder);
         }
