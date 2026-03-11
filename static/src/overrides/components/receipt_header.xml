@@ -4,7 +4,7 @@
         <!-- Remove tracking number container when present. -->
         <xpath expr="//span[hasclass('tracking-number')]/ancestor::div[1]" position="replace"/>
 
-        <!-- Remove empty placeholder node rendered as () using match() selector. 
-        <xpath expr="//div[hasclass('pos-receipt-contact')]/div[.='()']" position="replace"/>-->
+        <!-- Remove empty placeholder node rendered as () using match() selector. -->
+        <xpath expr="//div[hasclass('pos-receipt-contact')]/div[string-length(.)=2]" position="replace"/>
     </t>
 </templates>
