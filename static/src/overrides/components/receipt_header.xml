@@ -7,6 +7,15 @@
         <!-- Remove empty placeholder node rendered as (). -->
         <xpath expr="//div[.='()']" position="replace"/>
 
+        <!-- Show Spanish unique id in header instead of simplified invoice number. -->
+        <xpath expr="//div[hasclass('simplified-invoice-number')]" position="replace">
+            <div
+                class="simplified-invoice-number"
+                t-if="props.data.headerData and props.data.headerData.l10n_es_unique_id"
+                t-esc="props.data.headerData.l10n_es_unique_id"
+            />
+        </xpath>
+
         <!-- Render order date in header right below simplified invoice number. -->
         <xpath expr="//div[hasclass('simplified-invoice-number')]" position="after">
              <div id="order-date" t-if="props.data.date" t-esc="props.data.date" /> 
