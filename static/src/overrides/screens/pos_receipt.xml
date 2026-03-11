@@ -19,10 +19,10 @@
 
         <xpath expr="//div[@id='order-date']" position="replace"/>
 
-        <xpath expr="//*[hasclass('customer-name')]" position="replace">
+        <xpath expr="//div[span[hasclass('pos-receipt-right-align')] and contains(normalize-space(), 'Cliente')]" position="replace">
             <t t-set="customerName" t-value="((receipt and receipt.headerData and receipt.headerData.partner and receipt.headerData.partner.name) or '')"/>
-            <div t-if="!customerName.toLowerCase().includes('simplifica')" class="customer-name">
-                <t t-esc="customerName"/>
+            <div t-if="customerName and !customerName.toLowerCase().includes('simplifica')">
+                Cliente <span class="pos-receipt-right-align"><t t-esc="customerName"/></span>
             </div>
         </xpath>
 
