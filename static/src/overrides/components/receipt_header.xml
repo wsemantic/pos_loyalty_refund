@@ -11,5 +11,7 @@
         <xpath expr="//div[hasclass('simplified-invoice-number')]" position="after">
              <div id="order-date" t-if="props.data.date" t-esc="props.data.date" /> 
         </xpath>
+    
+
     </t>
 </templates>
