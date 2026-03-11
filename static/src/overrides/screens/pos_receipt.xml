@@ -19,12 +19,7 @@
 
         <xpath expr="//div[@id='order-date']" position="replace"/>
 
-        <xpath expr="//div[hasclass('pos-receipt-order-data')]/preceding-sibling::div[1]" position="replace">
-            <t t-set="customerName" t-value="((receipt and receipt.headerData and receipt.headerData.partner and receipt.headerData.partner.name) or '')"/>
-            <div t-if="customerName and !customerName.toLowerCase().includes('simplifica')">
-                Cliente <span class="pos-receipt-right-align"><t t-esc="customerName"/></span>
-            </div>
-        </xpath>
+        <xpath expr="//div/span[hasclass('pos-receipt-right-align')]" position="replace"/>
 
         <!-- Place barcode before footer block to ensure it is included before printer cut markers. -->
         <xpath expr="//div[hasclass('before-footer')]" position="before">
