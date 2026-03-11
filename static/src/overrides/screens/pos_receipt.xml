@@ -17,11 +17,8 @@
                 </t>
         </xpath>
 
-
-        <!-- Move order date just below simplified invoice number. -->
-        <xpath expr="//div[hasclass('simplified-invoice-number')]" position="after">
-            <xpath expr="//div[@id='order-date']" position="move"/>
-        </xpath>
+        <!-- Remove original date row from order-data to render it under invoice number. -->
+        <xpath expr="//div[@id='order-date']" position="replace"/>
 
         <!-- Place barcode before footer block to ensure it is included before printer cut markers. -->
         <xpath expr="//div[hasclass('before-footer')]" position="before">
@@ -32,8 +29,11 @@
                         t-att-src="'/report/barcode/Code128/' + simplifiedInvoiceNumber + '?width=560&amp;height=110&amp;quiet=0'"
                         alt="Simplified invoice barcode"
                     />
-                    <div>
+                    <div class="simplified-invoice-number">
                         <t t-esc="simplifiedInvoiceNumber"/>
+                    </div>
+                    <div id="order-date">
+                        <t t-esc="(receipt and receipt.date and receipt.date.localestring) or (receipt and receipt.date) or ''"/>
                     </div>
                 </div>
             </t>
