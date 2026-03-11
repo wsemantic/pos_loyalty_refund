@@ -17,7 +17,11 @@ patch(OrderReceipt.prototype, {
     },
 
     _applyReceiptLayout() {
-        const receiptWidth = this.pos?.config?.receipt_width || DEFAULT_RECEIPT_WIDTH;
+        const posService = this.env?.services?.pos || this.env?.pos;
+        const configuredWidth = Number(posService?.config?.receipt_width);
+        const receiptWidth = Number.isFinite(configuredWidth) && configuredWidth > 0
+            ? configuredWidth
+            : DEFAULT_RECEIPT_WIDTH;
         const widthPx = `${receiptWidth}px`;
 
         // Global variable consumed by stylesheet in both screen and print contexts.

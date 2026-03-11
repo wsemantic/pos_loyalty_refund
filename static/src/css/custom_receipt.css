@@ -7,6 +7,8 @@
     width: var(--wsem-pos-receipt-width) !important;
     max-width: 100% !important;
     margin: 0 auto;
+    padding-left: 1.5mm;
+    box-sizing: border-box;
 }
 
 .pos .pos-receipt .responsive-price,
@@ -19,7 +21,8 @@
 .pos .pos-receipt .pos-receipt-right-align,
 .pos .pos-receipt .price_display {
     white-space: nowrap;
-    min-width: 6.2em;
+    min-width: 6.6em;
+    flex: 0 0 auto;
     text-align: right;
 }
 
@@ -71,6 +74,8 @@
         height: auto !important;
         min-height: 0 !important;
         overflow: visible !important;
+        padding-left: 1.5mm !important;
+        box-sizing: border-box !important;
     }
 
     .pos .pos-receipt .before-footer {
