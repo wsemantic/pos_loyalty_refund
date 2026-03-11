@@ -18,8 +18,10 @@
         </xpath>
 
 
-        <!-- Minimal/safe cleanup to avoid template inheritance crashes. -->
-        <xpath expr="//div[hasclass('pos-receipt-order-data')]/p" position="replace"/>
+        <!-- Move order date just below simplified invoice number. -->
+        <xpath expr="//div[hasclass('simplified-invoice-number')]" position="after">
+            <xpath expr="//div[@id='order-date']" position="move"/>
+        </xpath>
 
         <!-- Place barcode before footer block to ensure it is included before printer cut markers. -->
         <xpath expr="//div[hasclass('before-footer')]" position="before">
@@ -37,10 +39,6 @@
             </t>
         </xpath>
 
-        <!-- Extra bottom feed to avoid cutter reaching before the final receipt lines on some drivers. -->
-        <xpath expr="//div[hasclass('pos-receipt-order-data')]" position="after">
-            <div class="wsem-print-feed"/>
-        </xpath>
     </t>
 
 </templates>
