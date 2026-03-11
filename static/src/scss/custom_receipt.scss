@@ -51,23 +51,23 @@
     html, body {
         margin: 0 !important;
         padding: 0 !important;
-        height: auto !important;
-        min-height: unset !important; // Volvemos a automático
+        height: auto !important; // Altura automática
+        min-height: unset !important; // Sin mínimos que fuercen largo extra
     }
 
     .pos .pos-receipt {
         width: var(--wsem-pos-receipt-width) !important;
-        height: auto !important; // Altura según el contenido
         display: block !important;
         overflow: visible !important;
+        height: auto !important;
         
-        /* EL SECRETO: Usar un padding-bottom para el avance de papel, 
-           pero sin forzar un alto fijo al body */
-        padding-bottom: 40mm !important; 
+        /* Avance de papel: solo el necesario para que la cuchilla no corte el texto */
+        /* Prueba con 30mm; si es mucho, bájalo a 20mm */
+        padding-bottom: 30mm !important; 
     }
 
-    /* Forzamos que los BR que el XML no haya cazado no ocupen espacio */
-    .pos-receipt br {
+    /* Matamos cualquier BR que el XML no haya podido cazar */
+    br {
         display: none !important;
         height: 0 !important;
     }
@@ -77,6 +77,7 @@
         margin-top: 0 !important;
         .simplified-invoice-number {
             margin-top: -5px !important;
+            font-size: 0.8em !important;
         }
     }
 }
