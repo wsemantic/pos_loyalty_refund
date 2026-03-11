@@ -24,7 +24,7 @@
         <xpath expr="//div[hasclass('before-footer')]" position="before">
             <t t-set="uniqueId" t-value="(receipt and receipt.l10n_es_unique_id) or (props and props.data and props.data.headerData and props.data.headerData.l10n_es_unique_id) or (headerData and headerData.l10n_es_unique_id)"/>
             <t t-if="uniqueId">
-                <div class="pos-receipt-center-align wsem-unique-id-barcode">
+                <div class="pos-receipt-center-align wsem-simplified-invoice-barcode">
                     <img
                         t-att-src="'/report/barcode/Code128/' + uniqueId + '?width=560&amp;height=110&amp;quiet=0'"
                         alt="Unique ID barcode"
