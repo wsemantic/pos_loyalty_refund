@@ -24,9 +24,15 @@
 }
 
 .wsem-simplified-invoice-barcode {
-    margin-top: 8px;
+    margin-top: 4px !important;
     page-break-inside: avoid;
     break-inside: avoid;
+}
+
+
+.pos-receipt-order-data p {
+    display: none; /* Si quieres eliminarlo por completo */
+    /* margin-bottom: 2px !important; (Si prefieres solo reducir espacio, comenta el display:none) */
 }
 
 .wsem-simplified-invoice-barcode img {
@@ -51,7 +57,11 @@
         min-height: 0 !important;
     }
 
-    .pos .pos-receipt,
+    .pos .pos-receipt{
+		/* Añadimos un margen interno al final de todo el ticket */
+		padding-bottom: 30mm !important; 
+    }
+	
     .pos .pos-receipt-container,
     .pos .pos-receipt-container > div {
         width: var(--wsem-pos-receipt-width) !important;
