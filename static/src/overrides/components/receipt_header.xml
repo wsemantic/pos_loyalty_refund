@@ -9,7 +9,7 @@
 
         <!-- Render order date in header right below simplified invoice number. -->
         <xpath expr="//div[hasclass('simplified-invoice-number')]" position="after">
-             <div id="order-date" t-esc="props.data.headerData.date" />			 
+             <div id="order-date" t-if="props.data.date" t-esc="props.data.date" /> 
         </xpath>
     </t>
 </templates>

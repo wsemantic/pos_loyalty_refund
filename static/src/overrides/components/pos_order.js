@@ -22,6 +22,7 @@ patch(PosOrder.prototype, {
 
         json.headerData = json.headerData || {};
         json.headerData.l10n_es_simplified_invoice_number = simplifiedInvoiceNumber;
+		json.headerData.date = json.date;
 
         debugBarcode("export_for_printing payload", {
             order_uid: this.uid,
