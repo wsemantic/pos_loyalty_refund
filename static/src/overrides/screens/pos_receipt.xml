@@ -29,9 +29,7 @@
                     <div class="simplified-invoice-number">
                         <t t-esc="simplifiedInvoiceNumber"/>
                     </div>
-                    <div id="order-date">
-                        <t t-esc="(receipt and receipt.date and receipt.date.localestring) or (receipt and receipt.date) or ''"/>
-                    </div>
+
                 </div>
             </t>
         </xpath>
