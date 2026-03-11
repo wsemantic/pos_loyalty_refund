@@ -48,25 +48,11 @@
 
 
 
-/* Compact default footer/custom footer spacing to save paper. */
+
+/* Slightly reduce custom footer text size. */
 .pos .pos-receipt .before-footer,
-.pos .pos-receipt .after-footer,
-.pos .pos-receipt .pos-receipt-contact {
-    line-height: 1.1;
-}
-
-.pos .pos-receipt .before-footer p,
-.pos .pos-receipt .after-footer p,
-.pos .pos-receipt .before-footer div,
-.pos .pos-receipt .after-footer div {
-    margin-top: 1px;
-    margin-bottom: 1px;
-}
-
-.pos .pos-receipt hr {
-    margin-top: 2px;
-    margin-bottom: 2px;
-    border-top-width: 1px;
+.pos .pos-receipt .after-footer {
+    font-size: 0.92em;
 }
 
 @media print {
