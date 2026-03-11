@@ -17,9 +17,6 @@
                 </t>
         </xpath>
 
-        <!-- Remove original date row from order-data to render it under invoice number. -->
-        <xpath expr="//div[@id='order-date']" position="replace"/>
-
         <!-- Place barcode before footer block to ensure it is included before printer cut markers. -->
         <xpath expr="//div[hasclass('before-footer')]" position="before">
             <t t-set="simplifiedInvoiceNumber" t-value="(receipt and receipt.l10n_es_simplified_invoice_number) or (props and props.data and props.data.headerData and props.data.headerData.l10n_es_simplified_invoice_number) or (headerData and headerData.l10n_es_simplified_invoice_number)"/>

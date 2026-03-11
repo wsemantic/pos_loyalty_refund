@@ -4,7 +4,14 @@
         <!-- Remove tracking number container when present. -->
         <xpath expr="//span[hasclass('tracking-number')]/ancestor::div[1]" position="replace"/>
 
-        <!-- Remove empty placeholder node rendered as () using match() selector. -->
+        <!-- Remove empty placeholder node rendered as (). -->
         <xpath expr="//div[.='()']" position="replace"/>
+
+        <!-- Render order date in header right below simplified invoice number. -->
+        <xpath expr="//div[hasclass('simplified-invoice-number')]" position="after">
+            <div id="order-date">
+                <t t-esc="(props and props.data and props.data.date and props.data.date.localestring) or (props and props.data and props.data.date) or ''"/>
+            </div>
+        </xpath>
     </t>
 </templates>
