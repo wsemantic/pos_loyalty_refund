@@ -43,44 +43,46 @@
 }
 
 @media print {
-    @page {
-        size: auto;
-        margin: 0;
-    }
-
-    html,
-    body {
+    /* 1. Reset para que el ticket no se "corte" mentalmente antes de tiempo */
+    html, body {
+        height: auto !important;
+        min-height: 250mm !important; /* Altura mínima muy alta para forzar el avance de papel */
         margin: 0 !important;
         padding: 0 !important;
-        height: auto !important;
-        min-height: 0 !important;
     }
 
-    .pos .pos-receipt{
-		/* Añadimos un margen interno al final de todo el ticket */
-		padding-bottom: 30mm !important; 
-    }
-    .pos .pos-receipt-container,
-    .pos .pos-receipt-container > div {
-        width: var(--wsem-pos-receipt-width) !important;
-        max-width: var(--wsem-pos-receipt-width) !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        height: auto !important;
-        min-height: 0 !important;
-        overflow: visible !important;
+    /* 2. Eliminar "Powered by Odoo" */
+    .pos-receipt-order-data p {
+        display: none !important;
     }
 
-    .pos .pos-receipt .before-footer {
-        margin-bottom: 2mm !important;
+    /* 3. QUITAR SALTOS DE LÍNEA (br) tras tu pie personalizado */
+    /* Esto eliminará los espacios en blanco sobrantes entre bloques */
+    .pos-receipt br, 
+    .pos-receipt-center-align + br,
+    .before-footer + br {
+        display: none !important;
     }
 
-    .pos .pos-receipt .pos-receipt-order-data {
-        padding-top: 0 !important;
-        padding-bottom: 8mm !important;
+    /* 4. Ajuste del código de barras (más pegado y pequeño) */
+    .wsem-simplified-invoice-barcode {
+        margin-top: 0 !important;
+        line-height: 1 !important;
     }
-
     .wsem-simplified-invoice-barcode img {
-        height: 24px;
+        height: 20px !important;
+        margin-bottom: 0 !important;
+    }
+    .wsem-simplified-invoice-barcode .simplified-invoice-number {
+        margin-top: -5px !important;
+        display: block !important;
+    }
+
+    /* 5. EL AVANCE DE PAPEL (Margen de seguridad) */
+    /* Aplicamos el margen al último nodo que ves en el DOM */
+    .pos-receipt-order-data {
+        margin-bottom: 50mm !important; 
+        padding-bottom: 0 !important;
+        display: block !important;
     }
 }
