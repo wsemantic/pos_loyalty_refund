@@ -19,7 +19,8 @@
 .pos .pos-receipt .pos-receipt-right-align,
 .pos .pos-receipt .price_display {
     white-space: nowrap;
-    min-width: 6.2em;
+    min-width: 6.6em;
+    flex: 0 0 auto;
     text-align: right;
 }
 
