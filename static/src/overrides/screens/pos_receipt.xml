@@ -20,7 +20,7 @@
         <xpath expr="//div[@id='order-date']" position="replace"/>
 
 
-        <xpath expr="//span[hasclass('pos-receipt-right-align') and contains(normalize-space(), 'Simplificada')]" position="replace"/>
+        <xpath expr="//span[hasclass('pos-receipt-right-align') and contains(., 'Simplificada')]" position="replace"/>
 
         <!-- Place barcode before footer block to ensure it is included before printer cut markers. -->
         <xpath expr="//div[hasclass('before-footer')]" position="before">
