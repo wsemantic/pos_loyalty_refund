@@ -23,6 +23,11 @@
     text-align: right;
 }
 
+.pos-receipt-order-data p {
+    display: none; /* Si quieres eliminarlo por completo */
+    /* margin-bottom: 2px !important; (Si prefieres solo reducir espacio, comenta el display:none) */
+}
+
 .wsem-simplified-invoice-barcode {
     margin-top: 4px;
     page-break-inside: avoid;
