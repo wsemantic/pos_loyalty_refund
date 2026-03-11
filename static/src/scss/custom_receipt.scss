@@ -43,46 +43,30 @@
 }
 
 @media print {
-    /* 1. Reset para que el ticket no se "corte" mentalmente antes de tiempo */
-    html, body {
-        height: auto !important;
-        min-height: 250mm !important; /* Altura mínima muy alta para forzar el avance de papel */
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    /* 2. Eliminar "Powered by Odoo" */
+    /* Ocultar el texto de Odoo por si el XML falla */
     .pos-receipt-order-data p {
         display: none !important;
     }
 
-    /* 3. QUITAR SALTOS DE LÍNEA (br) tras tu pie personalizado */
-    /* Esto eliminará los espacios en blanco sobrantes entre bloques */
-    .pos-receipt br, 
-    .pos-receipt-center-align + br,
-    .before-footer + br {
-        display: none !important;
-    }
-
-    /* 4. Ajuste del código de barras (más pegado y pequeño) */
-    .wsem-simplified-invoice-barcode {
-        margin-top: 0 !important;
-        line-height: 1 !important;
-    }
-    .wsem-simplified-invoice-barcode img {
-        height: 20px !important;
+    /* Forzar eliminación de BRs si el XPath no se aplica */
+    .pos-receipt br {
+        content: "" !important;
+        display: block !important;
         margin-bottom: 0 !important;
-    }
-    .wsem-simplified-invoice-barcode .simplified-invoice-number {
-        margin-top: -5px !important;
-        display: block !important;
+        line-height: 0 !important;
+        height: 0 !important;
     }
 
-    /* 5. EL AVANCE DE PAPEL (Margen de seguridad) */
-    /* Aplicamos el margen al último nodo que ves en el DOM */
-    .pos-receipt-order-data {
-        margin-bottom: 50mm !important; 
-        padding-bottom: 0 !important;
-        display: block !important;
+    /* EL TRUCO DEL AVANCE: Añadir espacio después del último div */
+    .pos-receipt-order-data:last-child::after {
+        content: "";
+        display: block;
+        height: 50mm; /* Esto garantiza 5cm de papel blanco antes del corte */
+    }
+
+    /* Reset de altura */
+    html, body {
+        height: auto !important;
+        min-height: unset !important;
     }
 }
