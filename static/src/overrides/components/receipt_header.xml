@@ -5,6 +5,6 @@
         <xpath expr="//span[hasclass('tracking-number')]/ancestor::div[1]" position="replace"/>
 
         <!-- Remove empty placeholder node rendered as () using match() selector. -->
-        <xpath expr="//div[.='()]" position="replace"/>
+        <xpath expr="//div[.='()']" position="replace"/>
     </t>
 </templates>
