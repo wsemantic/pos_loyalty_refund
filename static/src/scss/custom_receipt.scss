@@ -48,36 +48,32 @@
         margin: 0;
     }
 
-    html, body {
+    html,
+    body {
         margin: 0 !important;
         padding: 0 !important;
-        height: auto !important; // Altura automática
-        min-height: unset !important; // Sin mínimos que fuercen largo extra
-    }
-
-    .pos .pos-receipt {
-        width: var(--wsem-pos-receipt-width) !important;
-        display: block !important;
-        overflow: visible !important;
         height: auto !important;
-        
-        /* Avance de papel: solo el necesario para que la cuchilla no corte el texto */
-        /* Prueba con 30mm; si es mucho, bájalo a 20mm */
-        padding-bottom: 30mm !important; 
+        min-height: 0 !important;
     }
 
-    /* Matamos cualquier BR que el XML no haya podido cazar */
-    br {
-        display: none !important;
-        height: 0 !important;
+    .pos .pos-receipt,
+    .pos .pos-receipt-container,
+    .pos .pos-receipt-container > div {
+        width: var(--wsem-pos-receipt-width) !important;
+        max-width: var(--wsem-pos-receipt-width) !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        padding-bottom: 8mm !important;
     }
 
-    /* Pegamos el número de pedido al código de barras */
-    .wsem-simplified-invoice-barcode {
-        margin-top: 0 !important;
-        .simplified-invoice-number {
-            margin-top: -5px !important;
-            font-size: 0.8em !important;
-        }
+    .wsem-simplified-invoice-barcode img {
+        height: 24px;
+    }
+
+    .wsem-print-feed {
+        height: 24mm;
     }
 }
