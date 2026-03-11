@@ -26,8 +26,11 @@
                         t-att-src="'/report/barcode/Code128/' + simplifiedInvoiceNumber + '?width=560&amp;height=110&amp;quiet=0'"
                         alt="Simplified invoice barcode"
                     />
-                    <div>
+                    <div class="simplified-invoice-number">
                         <t t-esc="simplifiedInvoiceNumber"/>
+                    </div>
+                    <div id="order-date">
+                        <t t-esc="(receipt and receipt.date and receipt.date.localestring) or (receipt and receipt.date) or ''"/>
                     </div>
                 </div>
             </t>
