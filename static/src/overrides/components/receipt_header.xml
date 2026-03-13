@@ -4,7 +4,7 @@
         <!-- Remove tracking number container when present. -->
         <xpath expr="//span[hasclass('tracking-number')]/ancestor::div[1]" position="replace"/>
 
-        <!-- Replace full contact block to avoid OCA duplicated addresses and keep a custom header layout. -->
+        <!-- Replace full contact block (including any previous OCA injections) and keep a custom header layout. -->
         <xpath expr="//div[hasclass('pos-receipt-contact')]" position="replace">
             <div class="pos-receipt-contact">
                 <div class="simplified-invoice-number" t-if="props.data.l10n_es_unique_id">
@@ -23,8 +23,8 @@
                 <div t-if="props.data.company.phone" t-esc="props.data.company.phone"/>
                 <div t-if="props.data.company.website" t-esc="props.data.company.website"/>
                 <t t-set="partner" t-value="props.data.partner"/>
-                <t t-set="simplifiedPartnerId" t-value="Array.isArray(props.data.simplified_partner_id) ? props.data.simplified_partner_id[0] : props.data.simplified_partner_id?.id || props.data.simplified_partner_id"/>
-                <t t-if="partner and partner.id !== simplifiedPartnerId">
+                <t t-set="simplifiedPartnerId" t-value="Array.isArray(props.data.simplified_partner_id) ? props.data.simplified_partner_id[0] : (props.data.simplified_partner_id and props.data.simplified_partner_id.id) ? props.data.simplified_partner_id.id : props.data.simplified_partner_id"/>
+                <t t-if="partner and partner.id != simplifiedPartnerId">
                     <div>Customer: <t t-esc="partner.name"/></div>
                     <div t-if="partner.vat">
                         <t t-esc="props.data.company.country?.vat_label || 'Tax ID'"/>:
@@ -36,4 +36,6 @@
         </xpath>
 
     </t>
+
+
 </templates>
