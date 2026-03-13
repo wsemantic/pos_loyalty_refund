@@ -4,36 +4,27 @@
         <!-- Remove tracking number container when present. -->
         <xpath expr="//span[hasclass('tracking-number')]/ancestor::div[1]" position="replace"/>
 
-        <!--
-            OCA l10n_es_pos_oca injects a second company address block after company name.
-            Keep base address rendering and remove only this injected duplicate block.
-        -->
-        <xpath expr="//div[@t-if='props.data.company.street']" position="replace"/>
-        <xpath expr="//div[@t-if='props.data.company.zip']" position="replace"/>
-        <xpath expr="//div[@t-if='props.data.company.city']" position="replace"/>
-        <xpath expr="//div[@t-if='props.data.company.state_id']" position="replace"/>
-
-        <xpath expr="//div[@t-if='props.data.company.name']" position="after">
-            <div t-if="props.data.company.street" t-esc="props.data.company.street"/>
-            <div t-if="props.data.company.zip or props.data.company.city">
-                <t t-if="props.data.company.zip" t-esc="props.data.company.zip"/>
-                <t t-if="props.data.company.zip and props.data.company.city"> </t>
-                <t t-if="props.data.company.city" t-esc="props.data.company.city"/>
+        <!-- Replace full contact block to avoid OCA duplicated addresses and keep a custom header layout. -->
+        <xpath expr="//div[hasclass('pos-receipt-contact')]" position="replace">
+            <div class="pos-receipt-contact">
+                <div class="simplified-invoice-number" t-if="props.data.l10n_es_unique_id">
+                    <t>F. Simplif </t>
+                    <t t-esc="props.data.l10n_es_unique_id"/>
+                </div>
+                <div t-if="props.data.company.name" t-esc="props.data.company.name"/>
+                <div t-if="props.data.company.street" t-esc="props.data.company.street"/>
+                <div t-if="props.data.company.zip or props.data.company.city">
+                    <t t-if="props.data.company.zip" t-esc="props.data.company.zip"/>
+                    <t t-if="props.data.company.zip and props.data.company.city"> </t>
+                    <t t-if="props.data.company.city" t-esc="props.data.company.city"/>
+                </div>
+                <div t-if="props.data.company.vat" t-esc="props.data.company.vat"/>
+                <div t-if="props.data.company.phone" t-esc="props.data.company.phone"/>
+                <div t-if="props.data.company.website" t-esc="props.data.company.website"/>
             </div>
         </xpath>
 
-        <!-- Show Spanish unique id in header instead of simplified invoice number. -->
-        <xpath expr="//div[hasclass('simplified-invoice-number')]" position="replace">
-            <div
-                class="simplified-invoice-number"
-                t-if="props.data.l10n_es_unique_id"
-                t-esc="props.data.l10n_es_unique_id"
-            />
-        </xpath>
-
-        <!-- Render order date in header right below simplified invoice number. -->
-        <xpath expr="//div[hasclass('simplified-invoice-number')]" position="after">
-             <div id="order-date" t-if="props.data.date" t-esc="props.data.date" />
-        </xpath>
+        <!-- Do not show duplicated date line in custom receipt output. -->
+        <xpath expr="//div[@id='order-date']" position="replace"/>
     </t>
 </templates>
