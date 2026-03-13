@@ -24,6 +24,13 @@ patch(PosOrder.prototype, {
         json.headerData.l10n_es_unique_id = uniqueId;
         json.headerData.date = json.date;
 
+        // Some ReceiptHeader variants render partner contact/address blocks.
+        // Remove partner payload entirely so receipt contact section does not render.
+        json.partner = false;
+        if (json.headerData) {
+            json.headerData.partner = false;
+        }
+
         debugBarcode("export_for_printing payload", {
             order_uid: this.uid,
             order_server_id: this.server_id,

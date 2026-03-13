@@ -31,6 +31,11 @@
     /* margin-bottom: 2px !important; (Si prefieres solo reducir espacio, comenta el display:none) */
 }
 
+/* Hide partner contact block in receipt (robust fallback vs fragile xpath overrides). */
+.pos .pos-receipt .pos-receipt-contact {
+    display: none !important;
+}
+
 .wsem-simplified-invoice-barcode {
     margin-top: 8px;
     page-break-inside: avoid;
@@ -84,7 +89,7 @@
         overflow: visible !important;
         padding-left: 1.5mm !important;
         box-sizing: border-box !important;
-        padding-bottom: 8mm !important;
+        padding-bottom: 14mm !important;
     }
 
     .wsem-simplified-invoice-barcode img {
@@ -92,6 +97,6 @@
     }
 
     .wsem-print-feed {
-        height: 24mm;
+        height: 36mm;
     }
 }
