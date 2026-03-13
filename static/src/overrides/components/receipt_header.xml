@@ -4,8 +4,15 @@
         <!-- Remove tracking number container when present. -->
         <xpath expr="//span[hasclass('tracking-number')]/ancestor::div[1]" position="replace"/>
 
-        <!-- Remove empty placeholder node rendered as (). -->
-        <xpath expr="//div[.='()']" position="replace"/>
+        <!--
+            OCA l10n_es_pos_oca injects a second company address block after company name.
+            Keep base address rendering and remove only this injected duplicate block.
+        -->
+        <xpath expr="//div[@t-if='props.data.company.street']" position="replace"/>
+        <xpath expr="//div[@t-if='props.data.company.zip']" position="replace"/>
+        <xpath expr="//div[@t-if='props.data.company.city']" position="replace"/>
+        <xpath expr="//div[@t-if='props.data.company.state_id']" position="replace"/>
+
 
         <!-- Show Spanish unique id in header instead of simplified invoice number. -->
         <xpath expr="//div[hasclass('simplified-invoice-number')]" position="replace">
@@ -18,9 +25,7 @@
 
         <!-- Render order date in header right below simplified invoice number. -->
         <xpath expr="//div[hasclass('simplified-invoice-number')]" position="after">
-             <div id="order-date" t-if="props.data.date" t-esc="props.data.date" /> 
+             <div id="order-date" t-if="props.data.date" t-esc="props.data.date" />
         </xpath>
-    
-
     </t>
 </templates>
