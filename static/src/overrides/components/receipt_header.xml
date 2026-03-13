@@ -22,6 +22,16 @@
                 <div t-if="props.data.company.vat" t-esc="props.data.company.vat"/>
                 <div t-if="props.data.company.phone" t-esc="props.data.company.phone"/>
                 <div t-if="props.data.company.website" t-esc="props.data.company.website"/>
+                <t t-set="partner" t-value="props.data.partner"/>
+                <t t-set="simplifiedPartnerId" t-value="Array.isArray(props.data.simplified_partner_id) ? props.data.simplified_partner_id[0] : props.data.simplified_partner_id?.id || props.data.simplified_partner_id"/>
+                <t t-if="partner and partner.id !== simplifiedPartnerId">
+                    <div>Customer: <t t-esc="partner.name"/></div>
+                    <div t-if="partner.vat">
+                        <t t-esc="props.data.company.country?.vat_label || 'Tax ID'"/>:
+                        <t t-esc="partner.vat"/>
+                    </div>
+                    <div t-if="partner.address" t-esc="partner.address"/>
+                </t>
             </div>
         </xpath>
 
