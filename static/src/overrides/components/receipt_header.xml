@@ -13,6 +13,14 @@
         <xpath expr="//div[@t-if='props.data.company.city']" position="replace"/>
         <xpath expr="//div[@t-if='props.data.company.state_id']" position="replace"/>
 
+        <xpath expr="//div[@t-if='props.data.company.name']" position="after">
+            <div t-if="props.data.company.street" t-esc="props.data.company.street"/>
+            <div t-if="props.data.company.zip or props.data.company.city">
+                <t t-if="props.data.company.zip" t-esc="props.data.company.zip"/>
+                <t t-if="props.data.company.zip and props.data.company.city"> </t>
+                <t t-if="props.data.company.city" t-esc="props.data.company.city"/>
+            </div>
+        </xpath>
 
         <!-- Show Spanish unique id in header instead of simplified invoice number. -->
         <xpath expr="//div[hasclass('simplified-invoice-number')]" position="replace">
