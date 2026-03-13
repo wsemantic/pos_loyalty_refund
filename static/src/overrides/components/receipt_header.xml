@@ -23,6 +23,11 @@
         </xpath>
 
 
+
+
+        <!-- Remove verbose partner full address line to keep receipt compact. -->
+        <xpath expr="//div[@t-if='partner.address']" position="replace"/>
+
         <!-- Show Spanish unique id in header instead of simplified invoice number. -->
         <xpath expr="//div[hasclass('simplified-invoice-number')]" position="replace">
             <div
