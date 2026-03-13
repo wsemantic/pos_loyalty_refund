@@ -21,6 +21,9 @@
                 <setting id="pos_second_print_with_price" string="Second Print With Price" help="Enable second print with price">
                     <field name="enable_second_print_with_price"/>
                 </setting>
+                <setting id="pos_simplified_partner_debug" string="Simplified Invoice Partner (Debug)" help="Read-only value loaded from pos.config for debugging receipt behavior">
+                    <field name="simplified_partner_id" readonly="1"/>
+                </setting>
             </xpath>
         </field>
     </record>

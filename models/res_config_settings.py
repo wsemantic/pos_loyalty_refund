@@ -15,3 +15,9 @@ class ResConfigSettings(models.TransientModel):
         readonly=False,  # Permite editar el campo desde `res.config.settings`
         help="300 para impresoras de 80 mm. Modificalo a 220 para impresora de 58mm"
     )
+    simplified_partner_id = fields.Many2one(
+        'res.partner',
+        string='Simplified Invoice Partner',
+        related='pos_config_id.simplified_partner_id',
+        readonly=True,
+    )
