@@ -35,21 +35,4 @@
             </div>
         </xpath>
     </t>
-
-
-    <t t-name="wsem_gift_card.ReceiptHeaderOcaNodeReplace" t-inherit="OrderReceipt" t-inherit-mode="extension">
-        <!-- Explicitly replace OCA customer condition node so the original cannot render. -->
-        <xpath expr="//div[hasclass('pos-receipt-contact')]/t[@t-if='partner and partner.id !== props.data.simplified_partner_id']" position="replace">
-            <t t-set="simplifiedPartnerId" t-value="Array.isArray(props.data.simplified_partner_id) ? props.data.simplified_partner_id[0] : (props.data.simplified_partner_id and props.data.simplified_partner_id.id) ? props.data.simplified_partner_id.id : props.data.simplified_partner_id"/>
-            <t t-if="partner and partner.id != simplifiedPartnerId">
-                <div>Customer: <t t-esc="partner.name"/></div>
-                <div t-if="partner.vat">
-                    <t t-esc="props.data.company.country?.vat_label || 'Tax ID'"/>:
-                    <t t-esc="partner.vat"/>
-                </div>
-                <div t-if="partner.address" t-esc="partner.address"/>
-            </t>
-        </xpath>
-    </t>
-
 </templates>
