@@ -11,4 +11,6 @@ class PosSession(models.Model):
         fields = params.setdefault("search_params", {}).setdefault("fields", [])
         if "receipt_width" not in fields:
             fields.append("receipt_width")
+        if "simplified_partner_id" not in fields:
+            fields.append("simplified_partner_id")
         return params
