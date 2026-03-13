@@ -11,6 +11,7 @@
                     <t>F. Simplif </t>
                     <t t-esc="props.data.l10n_es_unique_id"/>
                 </div>
+                <div id="order-date" t-if="props.data.date" t-esc="props.data.date" />
                 <div t-if="props.data.company.name" t-esc="props.data.company.name"/>
                 <div t-if="props.data.company.street" t-esc="props.data.company.street"/>
                 <div t-if="props.data.company.zip or props.data.company.city">
@@ -24,7 +25,5 @@
             </div>
         </xpath>
 
-        <!-- Do not show duplicated date line in custom receipt output. -->
-        <xpath expr="//div[@id='order-date']" position="replace"/>
     </t>
 </templates>
