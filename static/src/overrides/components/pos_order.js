@@ -24,13 +24,11 @@ patch(PosOrder.prototype, {
         json.headerData.l10n_es_unique_id = uniqueId;
         json.headerData.date = json.date;
 
-        // OCA ReceiptHeader may render partner.address in a dedicated line.
-        // Clear it at payload level to keep receipts compact regardless of XML inherit order.
-        if (json.partner && Object.prototype.hasOwnProperty.call(json.partner, "address")) {
-            json.partner.address = false;
-        }
-        if (json.headerData.partner && Object.prototype.hasOwnProperty.call(json.headerData.partner, "address")) {
-            json.headerData.partner.address = false;
+        // Some ReceiptHeader variants render partner contact/address blocks.
+        // Remove partner payload entirely so receipt contact section does not render.
+        json.partner = false;
+        if (json.headerData) {
+            json.headerData.partner = false;
         }
 
         debugBarcode("export_for_printing payload", {
