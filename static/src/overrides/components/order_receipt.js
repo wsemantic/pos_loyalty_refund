@@ -16,6 +16,7 @@ patch(OrderReceipt.prototype, {
         onPatched(applyLayout);
     },
 
+
     _applyReceiptLayout() {
         const posService = this.env?.services?.pos || this.env?.pos;
         const configuredWidth = Number(posService?.config?.receipt_width);
