@@ -9,6 +9,16 @@ const debugBarcode = (...args) => {
     }
 };
 
+const resolveId = (value) => {
+    if (Array.isArray(value)) {
+        return value[0];
+    }
+    if (value && typeof value === "object") {
+        return value.id ?? value[0] ?? null;
+    }
+    return value ?? null;
+};
+
 patch(PosOrder.prototype, {
     export_for_printing(baseUrl, headerData) {
         const json = super.export_for_printing(...arguments);
@@ -23,6 +33,22 @@ patch(PosOrder.prototype, {
         json.headerData = json.headerData || {};
         json.headerData.l10n_es_unique_id = uniqueId;
         json.headerData.date = json.date;
+
+        const partnerId =
+            resolveId(json.partner_id) ??
+            resolveId(json.partner?.id) ??
+            resolveId(json.headerData.partner?.id);
+        const simplifiedPartnerId =
+            resolveId(json.simplified_partner_id) ??
+            resolveId(json.headerData.simplified_partner_id) ??
+            resolveId(this.pos?.config?.simplified_partner_id);
+
+        if (partnerId != null && simplifiedPartnerId != null && `${partnerId}` === `${simplifiedPartnerId}`) {
+            json.partner = null;
+            if (json.headerData.partner) {
+                json.headerData.partner = null;
+            }
+        }
 
         debugBarcode("export_for_printing payload", {
             order_uid: this.uid,
