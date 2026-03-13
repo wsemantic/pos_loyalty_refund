@@ -24,14 +24,6 @@
             </div>
         </xpath>
 
-        <!-- Keep unique id text without default simplified invoice number format. -->
-        <xpath expr="//div[hasclass('simplified-invoice-number')]" position="replace">
-            <div class="simplified-invoice-number" t-if="props.data.l10n_es_unique_id">
-                <t>F. Simplif </t>
-                <t t-esc="props.data.l10n_es_unique_id"/>
-            </div>
-        </xpath>
-
         <!-- Do not show duplicated date line in custom receipt output. -->
         <xpath expr="//div[@id='order-date']" position="replace"/>
     </t>
