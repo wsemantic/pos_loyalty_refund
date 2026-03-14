@@ -31,6 +31,10 @@
     /* margin-bottom: 2px !important; (Si prefieres solo reducir espacio, comenta el display:none) */
 }
 
+.pos-receipt-order-data div {
+    display: none;
+}
+
 .wsem-simplified-invoice-barcode {
     margin-top: 8px;
     page-break-inside: avoid;
@@ -44,12 +48,6 @@
     height: 28px;
     display: block;
 }
-
-.wsem-print-feed {
-    height: 24mm;
-}
-
-
 
 
 /* Slightly reduce custom footer text size. */
@@ -84,14 +82,10 @@
         overflow: visible !important;
         padding-left: 1.5mm !important;
         box-sizing: border-box !important;
-        padding-bottom: 14mm !important;
     }
 
     .wsem-simplified-invoice-barcode img {
         height: 24px;
     }
 
-    .wsem-print-feed {
-        height: 36mm;
-    }
 }
