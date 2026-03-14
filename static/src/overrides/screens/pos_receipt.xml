@@ -33,10 +33,6 @@
             </t>
         </xpath>
 
-        <!-- Extra feed to avoid thermal cutter trimming the last footer lines. -->
-        <xpath expr="//div[hasclass('pos-receipt-order-data')]" position="after">
-            <div class="wsem-print-feed"/>
-        </xpath>
 
     </t>
 

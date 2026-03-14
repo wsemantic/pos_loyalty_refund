@@ -38,6 +38,10 @@
     /* margin-bottom: 2px !important; (Si prefieres solo reducir espacio, comenta el display:none) */
 }
 
+.pos-receipt-order-data div {
+    display: none;
+}
+
 .wsem-simplified-invoice-barcode img {
     width: auto;
     max-width: 100%;
@@ -69,11 +73,6 @@
         min-height: 0 !important;
     }
 
-    .pos .pos-receipt{
-		/* Añadimos un margen interno al final de todo el ticket */
-		padding-bottom: 30mm !important; 
-    }
-	
     .pos .pos-receipt-container,
     .pos .pos-receipt-container > div {
         width: var(--wsem-pos-receipt-width) !important;
@@ -85,15 +84,6 @@
         overflow: visible !important;
         padding-left: 1.5mm !important;
         box-sizing: border-box !important;
-    }
-
-    .pos .pos-receipt .before-footer {
-        margin-bottom: 2mm !important;
-    }
-
-    .pos .pos-receipt .pos-receipt-order-data {
-        padding-top: 0 !important;
-        padding-bottom: 8mm !important;
     }
 
     .wsem-simplified-invoice-barcode img {
