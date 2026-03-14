@@ -58,6 +58,7 @@
 }
 
 
+
 /* Slightly reduce custom footer text size. */
 .pos .pos-receipt .before-footer,
 .pos .pos-receipt .after-footer {
@@ -98,7 +99,7 @@
     .pos .pos-receipt p {
         line-height: var(--wsem-pos-line-height) !important;
     }
-
+  
     .wsem-simplified-invoice-barcode img {
         height: 24px;
     }
