@@ -1,5 +1,6 @@
 :root {
     --wsem-pos-receipt-width: 300px;
+    --wsem-pos-line-height: 1.15;
 }
 
 /* Keep screen layout stable: only size the receipt itself, not full POS columns. */
@@ -9,6 +10,13 @@
     margin: 0 auto;
     padding-left: 1.5mm;
     box-sizing: border-box;
+    line-height: var(--wsem-pos-line-height);
+}
+
+.pos .pos-receipt div,
+.pos .pos-receipt span,
+.pos .pos-receipt p {
+    line-height: inherit;
 }
 
 .pos .pos-receipt .responsive-price,
@@ -84,6 +92,13 @@
         overflow: visible !important;
         padding-left: 1.5mm !important;
         box-sizing: border-box !important;
+    }
+
+    .pos .pos-receipt,
+    .pos .pos-receipt div,
+    .pos .pos-receipt span,
+    .pos .pos-receipt p {
+        line-height: var(--wsem-pos-line-height) !important;
     }
 
     .wsem-simplified-invoice-barcode img {
