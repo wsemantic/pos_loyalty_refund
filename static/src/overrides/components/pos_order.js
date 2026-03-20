@@ -31,10 +31,10 @@ const resolveProduct = (pos, value) => {
 };
 
 patch(PosOrder.prototype, {
-    _getRewardLineValuesDiscount(reward, coupon_id, args = {}) {
+    _getRewardLineValuesDiscount(args) {
         // Adaptation of Odoo POS loyalty reward flow:
         // addons/pos_loyalty/static/src/overrides/models/pos_order.js
-        let patchedReward = reward;
+        const reward = args?.reward;
         const fallbackDiscountProduct =
             resolveProduct(this.pos, reward?.discount_line_product_id) ||
             resolveProduct(this.pos, args?.product) ||
@@ -42,10 +42,14 @@ patch(PosOrder.prototype, {
             resolveProduct(this.pos, reward?.reward_product_ids?.[0]) ||
             resolveProduct(this.pos, this.pos?.config?.gift_card_product_id);
 
+        let patchedArgs = args;
         if (!resolveProduct(this.pos, reward?.discount_line_product_id) && fallbackDiscountProduct) {
-            patchedReward = {
-                ...reward,
-                discount_line_product_id: fallbackDiscountProduct,
+            patchedArgs = {
+                ...args,
+                reward: {
+                    ...reward,
+                    discount_line_product_id: fallbackDiscountProduct,
+                },
             };
             debugBarcode("Fallback discount line product applied", {
                 reward_id: reward?.id,
@@ -53,7 +57,7 @@ patch(PosOrder.prototype, {
             });
         }
 
-        return super._getRewardLineValuesDiscount(patchedReward, coupon_id, args);
+        return super._getRewardLineValuesDiscount(patchedArgs);
     },
 
     export_for_printing(baseUrl, headerData) {
