@@ -64,18 +64,12 @@ patch(ControlButtons.prototype, {
             getPayload: async (num) => {
                 try {
                     const enteredAmount = parseAmount(num);
-                    var vals = {
-                        product_id: giftCardProduct,
-                        tax_ids: getProductTaxes(giftCardProduct).map((tax) => tax.id ?? tax),
-                        // The popup amount is meant to be the final amount to refund.
-                        // Convert it to tax-excluded unit price only when taxes are excluded.
-                        price_unit: computeTaxExcludedPrice(giftCardProduct, enteredAmount)
-                    };
-                    if (!Number.isFinite(vals.price_unit)) {
+                    const priceUnit = computeTaxExcludedPrice(giftCardProduct, enteredAmount);
+                    if (!Number.isFinite(priceUnit)) {
                         return;
                     }
                     var opt = {};
-                    const product = vals.product_id;
+                    const product = giftCardProduct;
                     const order = this.pos.get_order();
                     const linkedPrograms = (
                         this.pos.models["loyalty.program"].getBy("trigger_product_ids", product.id) || []
@@ -108,7 +102,12 @@ patch(ControlButtons.prototype, {
                             return;
                         }
                     }
-                    await this.pos.addLineToOrder(vals, order, opt);
+                    await order.add_product(product, {
+                        ...opt,
+                        quantity: 1,
+                        price: priceUnit,
+                        merge: false,
+                    });
                     await this.pos.updatePrograms();
                     this.pos.updateRewards();
                 } catch (error) {
