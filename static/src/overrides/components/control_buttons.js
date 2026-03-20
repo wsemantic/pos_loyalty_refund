@@ -10,6 +10,8 @@ import { patch } from "@web/core/utils/patch";
 
 patch(ControlButtons.prototype, {
     async onClickGiftCard() {
+        // Adaptation of Odoo ProductScreen control buttons flow:
+        // addons/point_of_sale/static/src/app/screens/product_screen/control_buttons/control_buttons.js
         const order = this.pos.get_order();
         var amount = Math.abs(this.pos.get_order().get_total_with_tax());
         const parseAmount = (value) => {
@@ -109,7 +111,10 @@ patch(ControlButtons.prototype, {
                 const potentialRewards = this.pos.getPotentialFreeProductRewards();
                 const rewardsToApply = [];
                 for (const reward of potentialRewards) {
-                    for (const reward_product_id of reward.reward.reward_product_ids) {
+                    if (reward.reward?.reward_type !== "product") {
+                        continue;
+                    }
+                    for (const reward_product_id of reward.reward.reward_product_ids || []) {
                         if (reward_product_id.id == product.id) {
                             rewardsToApply.push(reward);
                         }
@@ -119,7 +124,7 @@ patch(ControlButtons.prototype, {
                 const result = await this.pos.addLineToOrder(vals, order, opt);
 
                 await this.pos.updatePrograms();
-                if (rewardsToApply.length == 1) {
+                if (rewardsToApply.length == 1 && rewardsToApply[0].reward?.reward_type === "product") {
                     const reward = rewardsToApply[0];
                     order._applyReward(reward.reward, reward.coupon_id, {
                         product: result.product_id,
