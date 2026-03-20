@@ -37,6 +37,14 @@ const getProductRef = (product) => {
     return [product.id, product.display_name || product.name || ""];
 };
 
+const getRewardFallbackProduct = (pos, reward, configuredGiftCardRef) => {
+    return (
+        resolveProduct(pos, reward?.reward_product_id) ||
+        resolveProduct(pos, reward?.reward_product_ids?.[0]) ||
+        resolveProduct(pos, configuredGiftCardRef)
+    );
+};
+
 patch(PosOrder.prototype, {
     _getRewardLineValuesDiscount(args) {
         // Adaptation of Odoo POS loyalty reward flow:
@@ -46,18 +54,21 @@ patch(PosOrder.prototype, {
 
         if (!resolvedDiscountProduct) {
             const configuredGiftCardRef = this.pos?.config?.gift_card_product_id;
-            const configuredGiftCardProduct = resolveProduct(this.pos, configuredGiftCardRef);
+            const rewardFallbackProduct = getRewardFallbackProduct(this.pos, reward, configuredGiftCardRef);
 
-            debugBarcode("Reward discount product missing, trying configured gift card product", {
+            debugBarcode("Reward discount product missing, trying reward-linked fallback", {
                 reward_id: reward?.id,
                 reward_type: reward?.reward_type,
+                program_type: reward?.program_type,
                 raw_discount_line_product_id: reward?.discount_line_product_id || null,
+                raw_reward_product_id: reward?.reward_product_id || null,
+                raw_reward_product_ids: reward?.reward_product_ids || [],
                 configured_gift_card_product_id: resolveId(configuredGiftCardRef),
-                configured_gift_card_product_loaded: !!configuredGiftCardProduct,
+                fallback_product_id: rewardFallbackProduct?.id || null,
             });
 
-            if (configuredGiftCardProduct) {
-                const fallbackDiscountProductRef = getProductRef(configuredGiftCardProduct);
+            if (rewardFallbackProduct) {
+                const fallbackDiscountProductRef = getProductRef(rewardFallbackProduct);
                 const patchedArgs = {
                     ...args,
                     reward: {
@@ -66,9 +77,11 @@ patch(PosOrder.prototype, {
                     },
                 };
 
-                debugBarcode("Using configured gift card product as reward discount fallback", {
+                debugBarcode("Using reward-linked discount fallback", {
                     reward_id: reward?.id,
-                    fallback_product_id: configuredGiftCardProduct.id,
+                    reward_type: reward?.reward_type,
+                    program_type: reward?.program_type,
+                    fallback_product_id: rewardFallbackProduct.id,
                     fallback_product_ref: fallbackDiscountProductRef,
                 });
 
