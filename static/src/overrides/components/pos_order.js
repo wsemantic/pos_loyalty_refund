@@ -30,34 +30,53 @@ const resolveProduct = (pos, value) => {
     return productId ? pos?.models["product.product"]?.get(productId) || null : null;
 };
 
+const getProductRef = (product) => {
+    if (!product?.id) {
+        return null;
+    }
+    return [product.id, product.display_name || product.name || ""];
+};
+
 patch(PosOrder.prototype, {
     _getRewardLineValuesDiscount(args) {
         // Adaptation of Odoo POS loyalty reward flow:
         // addons/pos_loyalty/static/src/overrides/models/pos_order.js
         const reward = args?.reward;
-        const fallbackDiscountProduct =
-            resolveProduct(this.pos, reward?.discount_line_product_id) ||
-            resolveProduct(this.pos, args?.product) ||
-            resolveProduct(this.pos, reward?.reward_product_id) ||
-            resolveProduct(this.pos, reward?.reward_product_ids?.[0]) ||
-            resolveProduct(this.pos, this.pos?.config?.gift_card_product_id);
+        const resolvedDiscountProduct = resolveProduct(this.pos, reward?.discount_line_product_id);
 
-        let patchedArgs = args;
-        if (!resolveProduct(this.pos, reward?.discount_line_product_id) && fallbackDiscountProduct) {
-            patchedArgs = {
-                ...args,
-                reward: {
-                    ...reward,
-                    discount_line_product_id: fallbackDiscountProduct,
-                },
-            };
-            debugBarcode("Fallback discount line product applied", {
+        if (!resolvedDiscountProduct) {
+            const configuredGiftCardRef = this.pos?.config?.gift_card_product_id;
+            const configuredGiftCardProduct = resolveProduct(this.pos, configuredGiftCardRef);
+
+            debugBarcode("Reward discount product missing, trying configured gift card product", {
                 reward_id: reward?.id,
-                fallback_product_id: fallbackDiscountProduct.id,
+                reward_type: reward?.reward_type,
+                raw_discount_line_product_id: reward?.discount_line_product_id || null,
+                configured_gift_card_product_id: resolveId(configuredGiftCardRef),
+                configured_gift_card_product_loaded: !!configuredGiftCardProduct,
             });
+
+            if (configuredGiftCardProduct) {
+                const fallbackDiscountProductRef = getProductRef(configuredGiftCardProduct);
+                const patchedArgs = {
+                    ...args,
+                    reward: {
+                        ...reward,
+                        discount_line_product_id: fallbackDiscountProductRef,
+                    },
+                };
+
+                debugBarcode("Using configured gift card product as reward discount fallback", {
+                    reward_id: reward?.id,
+                    fallback_product_id: configuredGiftCardProduct.id,
+                    fallback_product_ref: fallbackDiscountProductRef,
+                });
+
+                return super._getRewardLineValuesDiscount(patchedArgs);
+            }
         }
 
-        return super._getRewardLineValuesDiscount(patchedArgs);
+        return super._getRewardLineValuesDiscount(args);
     },
 
     export_for_printing(baseUrl, headerData) {
