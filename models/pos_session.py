@@ -37,7 +37,11 @@ class PosSession(models.Model):
             reward_domain.append(("company_id", "in", [False, self.config_id.company_id.id]))
         discount_product_ids = self.env["loyalty.reward"].sudo().search(reward_domain).mapped("discount_line_product_id").ids
 
-        if discount_product_ids:
-            search_params["domain"] = expression.OR([domain, [("id", "in", discount_product_ids)]])
+        forced_product_ids = set(discount_product_ids)
+        if self.config_id.gift_card_product_id:
+            forced_product_ids.add(self.config_id.gift_card_product_id.id)
+
+        if forced_product_ids:
+            search_params["domain"] = expression.OR([domain, [("id", "in", list(forced_product_ids))]])
 
         return params

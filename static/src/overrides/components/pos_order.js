@@ -30,54 +30,11 @@ const resolveProduct = (pos, value) => {
     return productId ? pos?.models["product.product"]?.get(productId) || null : null;
 };
 
-const normalizeProductRef = (value, fallbackProduct = null) => {
-    if (!value && !fallbackProduct) {
+const getProductRef = (product) => {
+    if (!product?.id) {
         return null;
     }
-    if (Array.isArray(value)) {
-        return value;
-    }
-    if (typeof value === "number") {
-        return value;
-    }
-    if (value && typeof value === "object" && !value.taxes_id) {
-        if (value.id != null && value.display_name) {
-            return [value.id, value.display_name];
-        }
-        if (value.id != null && value.name) {
-            return [value.id, value.name];
-        }
-        if (value.id != null) {
-            return value.id;
-        }
-    }
-    if (fallbackProduct?.id != null) {
-        return [fallbackProduct.id, fallbackProduct.display_name || fallbackProduct.name || ""];
-    }
-    return null;
-};
-
-const summarizeProductValue = (value) => {
-    if (!value) {
-        return value;
-    }
-    if (Array.isArray(value)) {
-        return value;
-    }
-    if (value.taxes_id) {
-        return {
-            id: value.id,
-            name: value.display_name || value.name,
-            taxes_id: value.taxes_id,
-        };
-    }
-    if (typeof value === "object") {
-        return {
-            id: value.id ?? value[0] ?? null,
-            name: value.display_name || value.name || value[1] || null,
-        };
-    }
-    return value;
+    return [product.id, product.display_name || product.name || ""];
 };
 
 patch(PosOrder.prototype, {
@@ -85,59 +42,41 @@ patch(PosOrder.prototype, {
         // Adaptation of Odoo POS loyalty reward flow:
         // addons/pos_loyalty/static/src/overrides/models/pos_order.js
         const reward = args?.reward;
-        const candidateSources = [
-            ["reward.discount_line_product_id", reward?.discount_line_product_id],
-            ["args.product", args?.product],
-            ["reward.reward_product_id", reward?.reward_product_id],
-            ["reward.reward_product_ids[0]", reward?.reward_product_ids?.[0]],
-            ["pos.config.gift_card_product_id", this.pos?.config?.gift_card_product_id],
-        ];
         const resolvedDiscountProduct = resolveProduct(this.pos, reward?.discount_line_product_id);
-        const fallbackCandidate = candidateSources
-            .map(([source, value]) => ({
-                source,
-                value,
-                resolvedProduct: resolveProduct(this.pos, value),
-            }))
-            .find((candidate) => candidate.resolvedProduct);
-        const fallbackDiscountProduct = fallbackCandidate?.resolvedProduct || null;
-        const fallbackDiscountProductRef = fallbackCandidate
-            ? normalizeProductRef(fallbackCandidate.value, fallbackDiscountProduct)
-            : null;
 
         if (!resolvedDiscountProduct) {
-            debugBarcode("Discount product candidates", {
+            const configuredGiftCardRef = this.pos?.config?.gift_card_product_id;
+            const configuredGiftCardProduct = resolveProduct(this.pos, configuredGiftCardRef);
+
+            debugBarcode("Reward discount product missing, trying configured gift card product", {
                 reward_id: reward?.id,
                 reward_type: reward?.reward_type,
-                program_type: reward?.program_type,
-                candidates: candidateSources.map(([source, value]) => ({
-                    source,
-                    raw: summarizeProductValue(value),
-                    normalized_ref: normalizeProductRef(value),
-                    resolved_product_id: resolveId(resolveProduct(this.pos, value)),
-                })),
-                selected_source: fallbackCandidate?.source || null,
+                raw_discount_line_product_id: reward?.discount_line_product_id || null,
+                configured_gift_card_product_id: resolveId(configuredGiftCardRef),
+                configured_gift_card_product_loaded: !!configuredGiftCardProduct,
             });
+
+            if (configuredGiftCardProduct) {
+                const fallbackDiscountProductRef = getProductRef(configuredGiftCardProduct);
+                const patchedArgs = {
+                    ...args,
+                    reward: {
+                        ...reward,
+                        discount_line_product_id: fallbackDiscountProductRef,
+                    },
+                };
+
+                debugBarcode("Using configured gift card product as reward discount fallback", {
+                    reward_id: reward?.id,
+                    fallback_product_id: configuredGiftCardProduct.id,
+                    fallback_product_ref: fallbackDiscountProductRef,
+                });
+
+                return super._getRewardLineValuesDiscount(patchedArgs);
+            }
         }
 
-        let patchedArgs = args;
-        if (!resolvedDiscountProduct && fallbackDiscountProductRef) {
-            patchedArgs = {
-                ...args,
-                reward: {
-                    ...reward,
-                    discount_line_product_id: fallbackDiscountProductRef,
-                },
-            };
-            debugBarcode("Fallback discount line product applied", {
-                reward_id: reward?.id,
-                selected_source: fallbackCandidate?.source || null,
-                fallback_product_id: fallbackDiscountProduct?.id || resolveId(fallbackDiscountProductRef),
-                fallback_product_ref: fallbackDiscountProductRef,
-            });
-        }
-
-        return super._getRewardLineValuesDiscount(patchedArgs);
+        return super._getRewardLineValuesDiscount(args);
     },
 
     export_for_printing(baseUrl, headerData) {
