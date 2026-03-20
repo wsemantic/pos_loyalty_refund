@@ -7,11 +7,11 @@
         <!-- Replace full contact block (including any previous OCA injections) and keep a custom header layout. -->
         <xpath expr="//div[hasclass('pos-receipt-contact')]" position="replace">
             <div class="pos-receipt-contact">
-                <div class="simplified-invoice-number" t-if="props.data.l10n_es_unique_id">
+                <div class="simplified-invoice-number wsem-receipt-primary-line" t-if="props.data.l10n_es_unique_id">
                     <t>F. Simplif </t>
                     <t t-esc="props.data.l10n_es_unique_id"/>
                 </div>
-                <div id="order-date" t-if="props.data.date" t-esc="props.data.date" />
+                <div id="order-date" class="wsem-receipt-primary-line" t-if="props.data.date" t-esc="props.data.date" />
                 <div t-if="props.data.company.name" t-esc="props.data.company.name"/>
                 <div t-if="props.data.company.street" t-esc="props.data.company.street"/>
                 <div t-if="props.data.company.zip or props.data.company.city">
