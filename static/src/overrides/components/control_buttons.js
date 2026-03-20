@@ -67,6 +67,7 @@ patch(ControlButtons.prototype, {
                 const enteredAmount = parseAmount(num);
                 var vals = {
                     product_id: giftCardProduct,
+                    tax_ids: getProductTaxes(giftCardProduct).map((tax) => tax.id ?? tax),
                     // The popup amount is meant to be the final amount to refund.
                     // Convert it to tax-excluded unit price only when taxes are excluded.
                     price_unit: computeTaxExcludedPrice(giftCardProduct, enteredAmount)

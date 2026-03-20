@@ -53,6 +53,18 @@ patch(TicketScreen.prototype, {
         this.printer = useState(useService("printer"));
         this.orm = useService("orm");
         this.doGPrint = useTrackedAsync((_selectedSyncedOrder) => this.printG(_selectedSyncedOrder));
+
+        const simplifiedSearchFieldName = Object.entries(this._getSearchFields()).find(
+            ([key, value]) => key === "SIMPLIFIED_INVOICE" || value?.modelField === "l10n_es_unique_id"
+        )?.[0];
+        if (simplifiedSearchFieldName) {
+            if (this.searchDetails && (!this.searchDetails.fieldName || this.searchDetails.fieldName === "RECEIPT_NUMBER")) {
+                this.searchDetails.fieldName = simplifiedSearchFieldName;
+            }
+            if (this.state?.search && (!this.state.search.fieldName || this.state.search.fieldName === "RECEIPT_NUMBER")) {
+                this.state.search.fieldName = simplifiedSearchFieldName;
+            }
+        }
     },
 
     async printG(order) {
