@@ -3,9 +3,7 @@ import { NumberPopup } from "@point_of_sale/app/utils/input_popups/number_popup"
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { ControlButtons } from "@point_of_sale/app/screens/product_screen/control_buttons/control_buttons";
 import { SelectionPopup } from "@point_of_sale/app/utils/input_popups/selection_popup";
-import { ask, makeAwaitable } from "@point_of_sale/app/store/make_awaitable_dialog";
-import { formatCurrency } from "@point_of_sale/app/models/utils/currency";
-import { TextInputPopup } from "@point_of_sale/app/utils/input_popups/text_input_popup";
+import { makeAwaitable } from "@point_of_sale/app/store/make_awaitable_dialog";
 import { patch } from "@web/core/utils/patch";
 
 patch(ControlButtons.prototype, {
@@ -109,28 +107,8 @@ patch(ControlButtons.prototype, {
                         return;
                     }
                 }
-                const potentialRewards = this.pos.getPotentialFreeProductRewards();
-                const rewardsToApply = [];
-                for (const reward of potentialRewards) {
-                    if (reward.reward?.reward_type !== "product") {
-                        continue;
-                    }
-                    for (const reward_product_id of reward.reward.reward_product_ids || []) {
-                        if (reward_product_id.id == product.id) {
-                            rewardsToApply.push(reward);
-                        }
-                    }
-                }
-
-                const result = await this.pos.addLineToOrder(vals, order, opt);
-
+                await this.pos.addLineToOrder(vals, order, opt);
                 await this.pos.updatePrograms();
-                if (rewardsToApply.length == 1 && rewardsToApply[0].reward?.reward_type === "product") {
-                    const reward = rewardsToApply[0];
-                    order._applyReward(reward.reward, reward.coupon_id, {
-                        product: result.product_id,
-                    });
-                }
                 this.pos.updateRewards();
             },
         });
