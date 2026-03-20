@@ -30,30 +30,110 @@ const resolveProduct = (pos, value) => {
     return productId ? pos?.models["product.product"]?.get(productId) || null : null;
 };
 
+const normalizeProductRef = (value, fallbackProduct = null) => {
+    if (!value && !fallbackProduct) {
+        return null;
+    }
+    if (Array.isArray(value)) {
+        return value;
+    }
+    if (typeof value === "number") {
+        return value;
+    }
+    if (value && typeof value === "object" && !value.taxes_id) {
+        if (value.id != null && value.display_name) {
+            return [value.id, value.display_name];
+        }
+        if (value.id != null && value.name) {
+            return [value.id, value.name];
+        }
+        if (value.id != null) {
+            return value.id;
+        }
+    }
+    if (fallbackProduct?.id != null) {
+        return [fallbackProduct.id, fallbackProduct.display_name || fallbackProduct.name || ""];
+    }
+    return null;
+};
+
+const summarizeProductValue = (value) => {
+    if (!value) {
+        return value;
+    }
+    if (Array.isArray(value)) {
+        return value;
+    }
+    if (value.taxes_id) {
+        return {
+            id: value.id,
+            name: value.display_name || value.name,
+            taxes_id: value.taxes_id,
+        };
+    }
+    if (typeof value === "object") {
+        return {
+            id: value.id ?? value[0] ?? null,
+            name: value.display_name || value.name || value[1] || null,
+        };
+    }
+    return value;
+};
+
 patch(PosOrder.prototype, {
     _getRewardLineValuesDiscount(args) {
         // Adaptation of Odoo POS loyalty reward flow:
         // addons/pos_loyalty/static/src/overrides/models/pos_order.js
         const reward = args?.reward;
-        const fallbackDiscountProduct =
-            resolveProduct(this.pos, reward?.discount_line_product_id) ||
-            resolveProduct(this.pos, args?.product) ||
-            resolveProduct(this.pos, reward?.reward_product_id) ||
-            resolveProduct(this.pos, reward?.reward_product_ids?.[0]) ||
-            resolveProduct(this.pos, this.pos?.config?.gift_card_product_id);
+        const candidateSources = [
+            ["reward.discount_line_product_id", reward?.discount_line_product_id],
+            ["args.product", args?.product],
+            ["reward.reward_product_id", reward?.reward_product_id],
+            ["reward.reward_product_ids[0]", reward?.reward_product_ids?.[0]],
+            ["pos.config.gift_card_product_id", this.pos?.config?.gift_card_product_id],
+        ];
+        const resolvedDiscountProduct = resolveProduct(this.pos, reward?.discount_line_product_id);
+        const fallbackCandidate = candidateSources
+            .map(([source, value]) => ({
+                source,
+                value,
+                resolvedProduct: resolveProduct(this.pos, value),
+            }))
+            .find((candidate) => candidate.resolvedProduct);
+        const fallbackDiscountProduct = fallbackCandidate?.resolvedProduct || null;
+        const fallbackDiscountProductRef = fallbackCandidate
+            ? normalizeProductRef(fallbackCandidate.value, fallbackDiscountProduct)
+            : null;
+
+        if (!resolvedDiscountProduct) {
+            debugBarcode("Discount product candidates", {
+                reward_id: reward?.id,
+                reward_type: reward?.reward_type,
+                program_type: reward?.program_type,
+                candidates: candidateSources.map(([source, value]) => ({
+                    source,
+                    raw: summarizeProductValue(value),
+                    normalized_ref: normalizeProductRef(value),
+                    resolved_product_id: resolveId(resolveProduct(this.pos, value)),
+                })),
+                selected_source: fallbackCandidate?.source || null,
+            });
+        }
 
         let patchedArgs = args;
-        if (!resolveProduct(this.pos, reward?.discount_line_product_id) && fallbackDiscountProduct) {
+        if (!resolvedDiscountProduct && fallbackDiscountProductRef) {
             patchedArgs = {
                 ...args,
                 reward: {
                     ...reward,
-                    discount_line_product_id: fallbackDiscountProduct,
+                    discount_line_product_id: fallbackDiscountProductRef,
                 },
             };
             debugBarcode("Fallback discount line product applied", {
                 reward_id: reward?.id,
-                fallback_product_id: fallbackDiscountProduct.id,
+                selected_source: fallbackCandidate?.source || null,
+                fallback_product_id: fallbackDiscountProduct?.id || resolveId(fallbackDiscountProductRef),
+                fallback_product_ref: fallbackDiscountProductRef,
             });
         }
 
