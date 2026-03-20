@@ -3,9 +3,7 @@ import { NumberPopup } from "@point_of_sale/app/utils/input_popups/number_popup"
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { ControlButtons } from "@point_of_sale/app/screens/product_screen/control_buttons/control_buttons";
 import { SelectionPopup } from "@point_of_sale/app/utils/input_popups/selection_popup";
-import { ask, makeAwaitable } from "@point_of_sale/app/store/make_awaitable_dialog";
-import { formatCurrency } from "@point_of_sale/app/models/utils/currency";
-import { TextInputPopup } from "@point_of_sale/app/utils/input_popups/text_input_popup";
+import { makeAwaitable } from "@point_of_sale/app/store/make_awaitable_dialog";
 import { patch } from "@web/core/utils/patch";
 
 patch(ControlButtons.prototype, {
@@ -64,74 +62,62 @@ patch(ControlButtons.prototype, {
             formatDisplayedValue: (x) => `${this.pos.currency.symbol} ${x}`,
             placeholder: _t("Amount"),
             getPayload: async (num) => {
-                const enteredAmount = parseAmount(num);
-                var vals = {
-                    product_id: giftCardProduct,
-                    tax_ids: getProductTaxes(giftCardProduct).map((tax) => tax.id ?? tax),
-                    // The popup amount is meant to be the final amount to refund.
-                    // Convert it to tax-excluded unit price only when taxes are excluded.
-                    price_unit: computeTaxExcludedPrice(giftCardProduct, enteredAmount)
-                };
-                if (!Number.isFinite(vals.price_unit)) {
-                    return;
-                }
-                var opt = {};
-                const product = vals.product_id;
-                const order = this.pos.get_order();
-                const linkedPrograms = (
-                    this.pos.models["loyalty.program"].getBy("trigger_product_ids", product.id) || []
-                ).filter((p) => ["gift_card", "ewallet"].includes(p.program_type));
-                let selectedProgram = null;
-                if (linkedPrograms.length > 1) {
-                    selectedProgram = await makeAwaitable(this.dialog, SelectionPopup, {
-                        title: _t("Select program"),
-                        list: linkedPrograms.map((program) => ({
-                            id: program.id,
-                            item: program,
-                            label: program.name,
-                        })),
-                    });
-                    if (!selectedProgram) {
+                try {
+                    const enteredAmount = parseAmount(num);
+                    var vals = {
+                        product_id: giftCardProduct,
+                        tax_ids: getProductTaxes(giftCardProduct).map((tax) => tax.id ?? tax),
+                        // The popup amount is meant to be the final amount to refund.
+                        // Convert it to tax-excluded unit price only when taxes are excluded.
+                        price_unit: computeTaxExcludedPrice(giftCardProduct, enteredAmount)
+                    };
+                    if (!Number.isFinite(vals.price_unit)) {
                         return;
                     }
-                } else if (linkedPrograms.length === 1) {
-                    selectedProgram = linkedPrograms[0];
-                }
+                    var opt = {};
+                    const product = vals.product_id;
+                    const order = this.pos.get_order();
+                    const linkedPrograms = (
+                        this.pos.models["loyalty.program"].getBy("trigger_product_ids", product.id) || []
+                    ).filter((p) => ["gift_card", "ewallet"].includes(p.program_type));
+                    let selectedProgram = null;
+                    if (linkedPrograms.length > 1) {
+                        selectedProgram = await makeAwaitable(this.dialog, SelectionPopup, {
+                            title: _t("Select program"),
+                            list: linkedPrograms.map((program) => ({
+                                id: program.id,
+                                item: program,
+                                label: program.name,
+                            })),
+                        });
+                        if (!selectedProgram) {
+                            return;
+                        }
+                    } else if (linkedPrograms.length === 1) {
+                        selectedProgram = linkedPrograms[0];
+                    }
 
-                if (selectedProgram && selectedProgram.program_type == "gift_card") {
-                    const shouldProceed = await this.pos._setupGiftCardOptions(selectedProgram, opt);
-                    if (!shouldProceed) {
-                        return;
-                    }
-                } else if (selectedProgram && selectedProgram.program_type == "ewallet") {
-                    const shouldProceed = await this.pos.setupEWalletOptions(selectedProgram, opt);
-                    if (!shouldProceed) {
-                        return;
-                    }
-                }
-                const potentialRewards = this.pos.getPotentialFreeProductRewards();
-                const rewardsToApply = [];
-                for (const reward of potentialRewards) {
-                    if (reward.reward?.reward_type !== "product") {
-                        continue;
-                    }
-                    for (const reward_product_id of reward.reward.reward_product_ids || []) {
-                        if (reward_product_id.id == product.id) {
-                            rewardsToApply.push(reward);
+                    if (selectedProgram && selectedProgram.program_type == "gift_card") {
+                        const shouldProceed = await this.pos._setupGiftCardOptions(selectedProgram, opt);
+                        if (!shouldProceed) {
+                            return;
+                        }
+                    } else if (selectedProgram && selectedProgram.program_type == "ewallet") {
+                        const shouldProceed = await this.pos.setupEWalletOptions(selectedProgram, opt);
+                        if (!shouldProceed) {
+                            return;
                         }
                     }
-                }
-
-                const result = await this.pos.addLineToOrder(vals, order, opt);
-
-                await this.pos.updatePrograms();
-                if (rewardsToApply.length == 1 && rewardsToApply[0].reward?.reward_type === "product") {
-                    const reward = rewardsToApply[0];
-                    order._applyReward(reward.reward, reward.coupon_id, {
-                        product: result.product_id,
+                    await this.pos.addLineToOrder(vals, order, opt);
+                    await this.pos.updatePrograms();
+                    this.pos.updateRewards();
+                } catch (error) {
+                    console.error("[pos_loyalty_refund] Error while confirming gift card amount", error);
+                    this.dialog.add(AlertDialog, {
+                        title: _t("Gift card error"),
+                        body: error?.message || _t("An unexpected error occurred while applying the gift card."),
                     });
                 }
-                this.pos.updateRewards();
             },
         });
     },
