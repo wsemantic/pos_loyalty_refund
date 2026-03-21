@@ -10,8 +10,6 @@ import { patch } from "@web/core/utils/patch";
 
 patch(ControlButtons.prototype, {
     async onClickGiftCard() {
-        // Adaptation of Odoo ProductScreen control buttons flow:
-        // addons/point_of_sale/static/src/app/screens/product_screen/control_buttons/control_buttons.js
         const order = this.pos.get_order();
         var amount = Math.abs(this.pos.get_order().get_total_with_tax());
         const parseAmount = (value) => {
@@ -67,7 +65,6 @@ patch(ControlButtons.prototype, {
                 const enteredAmount = parseAmount(num);
                 var vals = {
                     product_id: giftCardProduct,
-                    tax_ids: getProductTaxes(giftCardProduct).map((tax) => tax.id ?? tax),
                     // The popup amount is meant to be the final amount to refund.
                     // Convert it to tax-excluded unit price only when taxes are excluded.
                     price_unit: computeTaxExcludedPrice(giftCardProduct, enteredAmount)
@@ -112,10 +109,7 @@ patch(ControlButtons.prototype, {
                 const potentialRewards = this.pos.getPotentialFreeProductRewards();
                 const rewardsToApply = [];
                 for (const reward of potentialRewards) {
-                    if (reward.reward?.reward_type !== "product") {
-                        continue;
-                    }
-                    for (const reward_product_id of reward.reward.reward_product_ids || []) {
+                    for (const reward_product_id of reward.reward.reward_product_ids) {
                         if (reward_product_id.id == product.id) {
                             rewardsToApply.push(reward);
                         }
@@ -125,7 +119,7 @@ patch(ControlButtons.prototype, {
                 const result = await this.pos.addLineToOrder(vals, order, opt);
 
                 await this.pos.updatePrograms();
-                if (rewardsToApply.length == 1 && rewardsToApply[0].reward?.reward_type === "product") {
+                if (rewardsToApply.length == 1) {
                     const reward = rewardsToApply[0];
                     order._applyReward(reward.reward, reward.coupon_id, {
                         product: result.product_id,
