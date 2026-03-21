@@ -8,8 +8,6 @@ import { patch } from "@web/core/utils/patch";
 
 patch(ControlButtons.prototype, {
     async onClickGiftCard() {
-        // Adaptation of Odoo ProductScreen control buttons flow:
-        // addons/point_of_sale/static/src/app/screens/product_screen/control_buttons/control_buttons.js
         const order = this.pos.get_order();
         var amount = Math.abs(this.pos.get_order().get_total_with_tax());
         const parseAmount = (value) => {
@@ -62,59 +60,66 @@ patch(ControlButtons.prototype, {
             formatDisplayedValue: (x) => `${this.pos.currency.symbol} ${x}`,
             placeholder: _t("Amount"),
             getPayload: async (num) => {
-                try {
-                    const enteredAmount = parseAmount(num);
-                    const priceUnit = computeTaxExcludedPrice(giftCardProduct, enteredAmount);
-                    if (!Number.isFinite(priceUnit)) {
+                const enteredAmount = parseAmount(num);
+                var vals = {
+                    product_id: giftCardProduct,
+                    // The popup amount is meant to be the final amount to refund.
+                    // Convert it to tax-excluded unit price only when taxes are excluded.
+                    price_unit: computeTaxExcludedPrice(giftCardProduct, enteredAmount)
+                };
+                if (!Number.isFinite(vals.price_unit)) {
+                    return;
+                }
+                var opt = {};
+                const product = vals.product_id;
+                const order = this.pos.get_order();
+                const linkedPrograms = (
+                    this.pos.models["loyalty.program"].getBy("trigger_product_ids", product.id) || []
+                ).filter((p) => ["gift_card", "ewallet"].includes(p.program_type));
+                let selectedProgram = null;
+                if (linkedPrograms.length > 1) {
+                    selectedProgram = await makeAwaitable(this.dialog, SelectionPopup, {
+                        title: _t("Select program"),
+                        list: linkedPrograms.map((program) => ({
+                            id: program.id,
+                            item: program,
+                            label: program.name,
+                        })),
+                    });
+                    if (!selectedProgram) {
                         return;
                     }
-                    var opt = {};
-                    const product = giftCardProduct;
-                    const order = this.pos.get_order();
-                    const linkedPrograms = (
-                        this.pos.models["loyalty.program"].getBy("trigger_product_ids", product.id) || []
-                    ).filter((p) => ["gift_card", "ewallet"].includes(p.program_type));
-                    let selectedProgram = null;
-                    if (linkedPrograms.length > 1) {
-                        selectedProgram = await makeAwaitable(this.dialog, SelectionPopup, {
-                            title: _t("Select program"),
-                            list: linkedPrograms.map((program) => ({
-                                id: program.id,
-                                item: program,
-                                label: program.name,
-                            })),
-                        });
-                        if (!selectedProgram) {
-                            return;
+                } else if (linkedPrograms.length === 1) {
+                    selectedProgram = linkedPrograms[0];
+                }
+
+                if (selectedProgram && selectedProgram.program_type == "gift_card") {
+                    const shouldProceed = await this.pos._setupGiftCardOptions(selectedProgram, opt);
+                    if (!shouldProceed) {
+                        return;
+                    }
+                } else if (selectedProgram && selectedProgram.program_type == "ewallet") {
+                    const shouldProceed = await this.pos.setupEWalletOptions(selectedProgram, opt);
+                    if (!shouldProceed) {
+                        return;
+                    }
+                }
+                const potentialRewards = this.pos.getPotentialFreeProductRewards();
+                const rewardsToApply = [];
+                for (const reward of potentialRewards) {
+                    for (const reward_product_id of reward.reward.reward_product_ids) {
+                        if (reward_product_id.id == product.id) {
+                            rewardsToApply.push(reward);
                         }
                     } else if (linkedPrograms.length === 1) {
                         selectedProgram = linkedPrograms[0];
                     }
 
-                    if (selectedProgram && selectedProgram.program_type == "gift_card") {
-                        const shouldProceed = await this.pos._setupGiftCardOptions(selectedProgram, opt);
-                        if (!shouldProceed) {
-                            return;
-                        }
-                    } else if (selectedProgram && selectedProgram.program_type == "ewallet") {
-                        const shouldProceed = await this.pos.setupEWalletOptions(selectedProgram, opt);
-                        if (!shouldProceed) {
-                            return;
-                        }
-                    }
-                    await order.add_product(product, {
-                        ...opt,
-                        quantity: 1,
-                        price: priceUnit,
-                        merge: false,
-                    });
-                    await this.pos.updatePrograms();
-                    this.pos.updateRewards();
-                } catch (error) {
-                    console.error("[pos_loyalty_refund] Error while confirming gift card amount", error);
-                    this.dialog.add(AlertDialog, {
-                        title: _t("Gift card error"),
-                        body: error?.message || _t("An unexpected error occurred while applying the gift card."),
+                await this.pos.updatePrograms();
+                if (rewardsToApply.length == 1) {
+                    const reward = rewardsToApply[0];
+                    order._applyReward(reward.reward, reward.coupon_id, {
+                        product: result.product_id,
                     });
                 }
             },
