@@ -2,10 +2,6 @@
 <templates id="template" xml:space="preserve">
     <t t-name="pos_loyalty_refund.ControlButtons" t-inherit="point_of_sale.ControlButtons" t-inherit-mode="extension">
         <xpath expr="//t[@t-if='props.showRemainingButtons']/div/OrderlineNoteButton" position="after">
-            <t t-log="this.pos.config.gift_card_product_id"/>
-            <t t-log="this.pos.config.gift_card_product_id[0]"/>
-            <t t-log="this.pos.get_order()"/>
-            <t t-log="this.pos.get_order().get_total_without_tax()"/>
             <button t-if="this.pos.config.gift_card_product_id and this.pos.get_order().get_total_without_tax() &lt; 0"
                 class="js_giftcard"
                 t-att-class="buttonClass"
