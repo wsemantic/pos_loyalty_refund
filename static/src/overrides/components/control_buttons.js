@@ -6,21 +6,12 @@ import { SelectionPopup } from "@point_of_sale/app/utils/input_popups/selection_
 import { makeAwaitable } from "@point_of_sale/app/store/make_awaitable_dialog";
 import { patch } from "@web/core/utils/patch";
 
-const addProductToOrder = async (order, product, options) => {
-    if (typeof order?.add_product === "function") {
-        return order.add_product(product, options);
-    }
-    if (typeof order?.addProduct === "function") {
-        return order.addProduct(product, options);
-    }
-    throw new Error(_t("The POS order does not support adding products in this session."));
-};
-
 patch(ControlButtons.prototype, {
     async onClickGiftCard() {
         // Adaptation of Odoo ProductScreen control buttons flow:
         // addons/point_of_sale/static/src/app/screens/product_screen/control_buttons/control_buttons.js
-        const amount = Math.abs(this.pos.get_order().get_total_with_tax());
+        const order = this.pos.get_order();
+        var amount = Math.abs(this.pos.get_order().get_total_with_tax());
         const parseAmount = (value) => {
             if (typeof value === "number") {
                 return value;
@@ -73,12 +64,18 @@ patch(ControlButtons.prototype, {
             getPayload: async (num) => {
                 try {
                     const enteredAmount = parseAmount(num);
-                    const priceUnit = computeTaxExcludedPrice(giftCardProduct, enteredAmount);
-                    if (!Number.isFinite(priceUnit)) {
+                    var vals = {
+                        product_id: giftCardProduct,
+                        tax_ids: getProductTaxes(giftCardProduct).map((tax) => tax.id ?? tax),
+                        // The popup amount is meant to be the final amount to refund.
+                        // Convert it to tax-excluded unit price only when taxes are excluded.
+                        price_unit: computeTaxExcludedPrice(giftCardProduct, enteredAmount)
+                    };
+                    if (!Number.isFinite(vals.price_unit)) {
                         return;
                     }
-                    const opt = {};
-                    const product = giftCardProduct;
+                    var opt = {};
+                    const product = vals.product_id;
                     const order = this.pos.get_order();
                     const linkedPrograms = (
                         this.pos.models["loyalty.program"].getBy("trigger_product_ids", product.id) || []
@@ -100,23 +97,18 @@ patch(ControlButtons.prototype, {
                         selectedProgram = linkedPrograms[0];
                     }
 
-                    if (selectedProgram?.program_type === "gift_card") {
+                    if (selectedProgram && selectedProgram.program_type == "gift_card") {
                         const shouldProceed = await this.pos._setupGiftCardOptions(selectedProgram, opt);
                         if (!shouldProceed) {
                             return;
                         }
-                    } else if (selectedProgram?.program_type === "ewallet") {
+                    } else if (selectedProgram && selectedProgram.program_type == "ewallet") {
                         const shouldProceed = await this.pos.setupEWalletOptions(selectedProgram, opt);
                         if (!shouldProceed) {
                             return;
                         }
                     }
-                    await addProductToOrder(order, product, {
-                        ...opt,
-                        quantity: 1,
-                        price: priceUnit,
-                        merge: false,
-                    });
+                    await this.pos.addLineToOrder(vals, order, opt);
                     await this.pos.updatePrograms();
                     this.pos.updateRewards();
                 } catch (error) {
