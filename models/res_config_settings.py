@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import fields, models, api
+from odoo import fields, models
 
 
 class ResConfigSettings(models.TransientModel):
@@ -10,7 +10,6 @@ class ResConfigSettings(models.TransientModel):
     enable_second_print_with_price = fields.Boolean('Enable Second Print With Price', related='pos_config_id.enable_second_print_with_price', readonly=False)
     receipt_width = fields.Integer(
         string="Ancho del Recibo en px (300 para 80mm, 220 para 58mm)",
-        default=300,
         related="pos_config_id.receipt_width",
         readonly=False,  # Permite editar el campo desde `res.config.settings`
         help="300 para impresoras de 80 mm. Modificalo a 220 para impresora de 58mm"
