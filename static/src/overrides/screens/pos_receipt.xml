@@ -20,9 +20,9 @@
         <xpath expr="//div[@id='order-date']" position="replace"/>
 
 
-        <!-- Place barcode before footer block to ensure it is included before printer cut markers. -->
-        <xpath expr="//div[hasclass('before-footer')]" position="before">
-            <t t-set="uniqueId" t-value="(props and props.data and props.data.l10n_es_unique_id) or (receipt and receipt.l10n_es_unique_id) or (props and props.data and props.data.headerData and props.data.headerData.l10n_es_unique_id) or (headerData and headerData.l10n_es_unique_id)"/>
+        <!-- Keep the simplified-invoice barcode outside the !props.basic_receipt block so it is also printed in the basic/no-price receipt. -->
+        <xpath expr="//t[@t-if='!props.basic_receipt']" position="before">
+            <t t-set="uniqueId" t-value="(receipt and receipt.l10n_es_unique_id) or (props and props.data and props.data.headerData and props.data.headerData.l10n_es_unique_id) or (headerData and headerData.l10n_es_unique_id)"/>
             <t t-if="uniqueId">
                 <div class="pos-receipt-center-align wsem-simplified-invoice-barcode">
                     <img
