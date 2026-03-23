@@ -13,6 +13,15 @@ const debugBarcode = (...args) => {
     }
 };
 
+const summarizeReceiptPayload = (payload) => ({
+    l10n_es_unique_id: payload?.l10n_es_unique_id,
+    ticket_code: payload?.ticket_code,
+    basic_receipt: payload?.basic_receipt,
+    header_l10n_es_unique_id: payload?.headerData?.l10n_es_unique_id,
+    header_date: payload?.headerData?.date,
+    line_count: Array.isArray(payload?.orderlines) ? payload.orderlines.length : undefined,
+});
+
 patch(TicketScreen.prototype, {
     _getSearchFields() {
         // Adaptation of Odoo TicketScreen search fields:
@@ -79,13 +88,33 @@ patch(TicketScreen.prototype, {
         debugBarcode("printG start", {
             id: order?.id,
             server_id: order?.server_id,
-            orderId,
+            constructor: order?.constructor?.name,
+            has_export_for_printing: typeof order?.export_for_printing === "function",
             l10n_es_unique_id: order?.l10n_es_unique_id,
             name: order?.name,
             pos_reference: order?.pos_reference,
         });
 
-        if (order && !order.l10n_es_unique_id && orderId) {
+        if (typeof order?.export_for_printing === "function") {
+            try {
+                debugBarcode(
+                    "printG export_for_printing before orm.read",
+                    summarizeReceiptPayload(order.export_for_printing())
+                );
+            } catch (error) {
+                debugBarcode("printG export_for_printing before orm.read failed", error);
+            }
+        }
+
+        if (!order?.server_id) {
+            debugBarcode("printG missing server_id on synced order", {
+                id: order?.id,
+                uid: order?.uid,
+                l10n_es_unique_id: order?.l10n_es_unique_id,
+            });
+        }
+
+        if (order && !order.l10n_es_unique_id && order.server_id) {
             const [dbOrder] = await this.orm.read(
                 "pos.order",
                 [orderId],
@@ -95,6 +124,17 @@ patch(TicketScreen.prototype, {
                 order.l10n_es_unique_id = dbOrder.l10n_es_unique_id;
             }
             debugBarcode("printG orm.read pos.order", dbOrder);
+        }
+
+        if (typeof order?.export_for_printing === "function") {
+            try {
+                debugBarcode(
+                    "printG export_for_printing before printReceipt",
+                    summarizeReceiptPayload(order.export_for_printing())
+                );
+            } catch (error) {
+                debugBarcode("printG export_for_printing before printReceipt failed", error);
+            }
         }
 
         await this.pos.printReceipt({
