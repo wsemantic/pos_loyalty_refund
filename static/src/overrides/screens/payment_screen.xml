@@ -8,17 +8,8 @@
     -->
     <t t-name="pos_loyalty_refund.PaymentScreenValidate" t-inherit="point_of_sale.PaymentScreenValidate" t-inherit-mode="extension">
         <xpath expr="//button[hasclass('validation-button') and hasclass('next')]" position="replace">
-            <button class="validation-button next btn btn-primary btn-lg py-3 lh-lg mx-2"
-                t-on-click="() => this.validateOrder()"
-                t-if="!pos.config.iface_print_auto"
-                t-attf-class="
-                    {{ ui.isSmall ? 'btn-switchpane flex-fill' : 'button next w-50' }}
-                    {{ currentOrder.canBeValidated() ? 'highlight' : 'disabled' }}
-                ">
-                <span>Validar</span>
-            </button>
-            <div t-else="" class="d-flex flex-row w-100 border-0 h-100">
-                <button class="validation-button next btn btn-primary btn-lg py-3 lh-lg mx-2"
+            <div class="d-flex flex-row w-100 border-0 h-100 gap-2">
+                <button class="validation-button next btn btn-primary btn-lg py-3 lh-lg"
                     t-on-click="() => this.validateOrder()"
                     t-attf-class="
                         {{ ui.isSmall ? 'btn-switchpane flex-fill' : 'button next w-50' }}
