@@ -6,9 +6,9 @@
         addons/point_of_sale/static/src/app/screens/payment_screen/payment_screen.xml
         GitHub: https://github.com/odoo/odoo/blob/18.0/addons/point_of_sale/static/src/app/screens/payment_screen/payment_screen.xml
     -->
-    <t t-name="pos_loyalty_refund.PaymentScreenButtons" t-inherit="point_of_sale.PaymentScreenButtons" t-inherit-mode="extension">
-        <xpath expr="//button[hasclass('validation-button')]" position="replace">
-            <button class="validation-button btn btn-primary btn-lg py-3 lh-lg mx-2"
+    <t t-name="pos_loyalty_refund.PaymentScreenValidate" t-inherit="point_of_sale.PaymentScreenValidate" t-inherit-mode="extension">
+        <xpath expr="//button[hasclass('validation-button') and hasclass('next')]" position="replace">
+            <button class="validation-button next btn btn-primary btn-lg py-3 lh-lg mx-2"
                 t-on-click="() => this.validateOrder()"
                 t-if="!pos.config.iface_print_auto"
                 t-attf-class="
@@ -18,7 +18,7 @@
                 <span>Validar</span>
             </button>
             <div t-else="" class="d-flex flex-row w-100 border-0 h-100">
-                <button class="validation-button btn btn-primary btn-lg py-3 lh-lg mx-2"
+                <button class="validation-button next btn btn-primary btn-lg py-3 lh-lg mx-2"
                     t-on-click="() => this.validateOrder()"
                     t-attf-class="
                         {{ ui.isSmall ? 'btn-switchpane flex-fill' : 'button next w-50' }}
@@ -26,7 +26,7 @@
                     ">
                     <span>Validar</span>
                 </button>
-                <button class="validation-button btn btn-primary btn-lg py-3 lh-lg"
+                <button class="validation-button next btn btn-primary btn-lg py-3 lh-lg"
                     t-on-click="() => this.validateOrder(false, true)"
                     t-attf-class="
                         {{ ui.isSmall ? 'btn-switchpane flex-fill' : 'button next w-50' }}
