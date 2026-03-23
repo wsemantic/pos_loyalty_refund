@@ -79,6 +79,12 @@ patch(TicketScreen.prototype, {
     async printG(order) {
         // Adaptation of Odoo TicketScreen printing flow:
         // addons/point_of_sale/static/src/app/screens/ticket_screen/ticket_screen.js
+        const orderId = Number.isInteger(order?.server_id)
+            ? order.server_id
+            : Number.isInteger(order?.id)
+                ? order.id
+                : null;
+
         debugBarcode("printG start", {
             id: order?.id,
             server_id: order?.server_id,
@@ -111,7 +117,7 @@ patch(TicketScreen.prototype, {
         if (order && !order.l10n_es_unique_id && order.server_id) {
             const [dbOrder] = await this.orm.read(
                 "pos.order",
-                [order.server_id],
+                [orderId],
                 ["l10n_es_unique_id", "name", "pos_reference"]
             );
             if (dbOrder?.l10n_es_unique_id) {
