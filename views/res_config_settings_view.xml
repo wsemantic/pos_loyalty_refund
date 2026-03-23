@@ -18,7 +18,7 @@
                 <setting id="pos_receipt_width" string="Receipt Width" help="Receipt width">
                     <field name="receipt_width"/>
                 </setting>
-                <setting id="pos_second_print_with_price" string="Second Print With Price" help="Enable second print with price">
+                <setting id="pos_second_print_with_price" string="Imprime segundo ticket con precio" help="Imprime un segundo ticket con precio">
                     <field name="enable_second_print_with_price"/>
                 </setting>
                 <setting id="pos_simplified_partner_debug" string="Simplified Invoice Partner (Debug)" help="Read-only value loaded from pos.config for debugging receipt behavior">

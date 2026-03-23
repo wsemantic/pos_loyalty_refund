@@ -15,3 +15,24 @@ msgstr ""
 #, python-format
 msgid "Enter Code"
 msgstr "Pagar con Tar. Regalo"
+
+#. module: pos_loyalty_refund
+#: model_terms:ir.ui.view,arch_db:pos_loyalty_refund.res_config_view_form_inherit_pos_loyalty_refund
+msgid "Imprime segundo ticket con precio"
+msgstr "Imprime segundo ticket con precio"
+
+#. module: pos_loyalty_refund
+#: model_terms:ir.ui.view,arch_db:pos_loyalty_refund.res_config_view_form_inherit_pos_loyalty_refund
+msgid "Imprime un segundo ticket con precio"
+msgstr "Imprime un segundo ticket con precio"
+
+#. module: pos_loyalty_refund
+#: model_terms:ir.ui.view,arch_db:pos_loyalty_refund.pos_loyalty_refund_TicketScreen
+msgid "Imprimir sin precio"
+msgstr "Imprimir sin precio"
+
+#. module: pos_loyalty_refund
+#: model:ir.model.fields,field_description:pos_loyalty_refund.field_res_config_settings__enable_second_print_with_price
+#: model:ir.model.fields,field_description:pos_loyalty_refund.field_pos_config__enable_second_print_with_price
+msgid "Enable Second Print With Price"
+msgstr "Imprime segundo ticket con precio"

@@ -71,6 +71,7 @@ patch(TicketScreen.prototype, {
         // Adaptation of Odoo TicketScreen printing flow:
         // addons/point_of_sale/static/src/app/screens/ticket_screen/ticket_screen.js
         debugBarcode("printG start", {
+            id: order?.id,
             server_id: order?.server_id,
             l10n_es_unique_id: order?.l10n_es_unique_id,
             name: order?.name,
