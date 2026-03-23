@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+     <t t-name="wsem_gift_card.OrderReceipt" t-inherit="point_of_sale.OrderReceipt" t-inherit-mode="extension">
+        <xpath expr="//Orderline" position="inside">
+                <t t-if="line.gift_card_code">
+                    <div class="coupon-container">
+                        <div style="max-width: 150px">
+                            <img t-att-src="'/report/barcode/Code128/'+line.gift_card_code+'?width=800&amp;height=200&amp;quiet=0'" style="width:150px;height:25px" alt="Barcode"/>
+                            <div style="text-align: center">
+                                <t t-esc="line.gift_card_code"/>
+                            </div>
+                            <div style="text-align: center">
+                                Saldo: <t t-esc="this.env.utils.formatCurrency(line.gift_card_balance)"/>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+        </xpath>
+
+        <xpath expr="//div[@id='order-date']" position="replace"/>
+
+
+        <!-- Place barcode before footer block to ensure it is included before printer cut markers. -->
+        <xpath expr="//div[hasclass('before-footer')]" position="before">
+            <t t-set="uniqueId" t-value="(receipt and receipt.l10n_es_unique_id) or (props and props.data and props.data.headerData and props.data.headerData.l10n_es_unique_id) or (headerData and headerData.l10n_es_unique_id)"/>
+            <t t-if="uniqueId">
+                <div class="pos-receipt-center-align wsem-simplified-invoice-barcode">
+                    <img
+                        t-att-src="'/report/barcode/Code128/' + uniqueId + '?width=560&amp;height=110&amp;quiet=0'"
+                        alt="Unique ID barcode"
+                    />
+                </div>
+            </t>
+        </xpath>
+
+
+    </t>
+
+</templates>

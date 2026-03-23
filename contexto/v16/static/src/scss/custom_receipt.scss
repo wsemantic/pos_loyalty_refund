@@ -1,0 +1,118 @@
+:root {
+    --wsem-pos-receipt-width: 300px;
+    --wsem-pos-line-height: 1.15;
+}
+
+/* Keep screen layout stable: only size the receipt itself, not full POS columns. */
+.pos .pos-receipt {
+    width: var(--wsem-pos-receipt-width) !important;
+    max-width: 100% !important;
+    margin: 0 auto;
+    padding-left: 1.5mm;
+    box-sizing: border-box;
+    line-height: var(--wsem-pos-line-height);
+}
+
+.pos .pos-receipt div,
+.pos .pos-receipt span,
+.pos .pos-receipt p {
+    line-height: inherit;
+}
+
+.pos .pos-receipt .responsive-price,
+.pos .pos-receipt .pos-receipt-amount {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.pos .pos-receipt .pos-receipt-right-align,
+.pos .pos-receipt .price_display {
+    white-space: nowrap;
+    min-width: 6.6em;
+    flex: 0 0 auto;
+    text-align: right;
+}
+
+.pos-receipt-order-data p {
+    display: none; /* Si quieres eliminarlo por completo */
+    /* margin-bottom: 2px !important; (Si prefieres solo reducir espacio, comenta el display:none) */
+}
+
+.pos-receipt-order-data div {
+    display: none;
+}
+
+
+.pos .pos-receipt .pos-receipt-contact {
+    font-size: 1.04em;
+}
+
+.pos .pos-receipt .pos-receipt-contact .wsem-receipt-primary-line {
+    font-size: 1.14em;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.wsem-simplified-invoice-barcode {
+    margin-top: 8px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.wsem-simplified-invoice-barcode img {
+    width: auto;
+    max-width: 100%;
+    margin: 0 auto;
+    height: 28px;
+    display: block;
+}
+
+
+
+/* Slightly reduce custom footer text size. */
+.pos .pos-receipt .before-footer,
+.pos .pos-receipt .after-footer {
+    font-size: 0.82em;
+}
+
+@media print {
+    @page {
+        size: auto;
+        margin: 0;
+    }
+
+    html,
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+    }
+
+    .pos .pos-receipt,
+    .pos .pos-receipt-container,
+    .pos .pos-receipt-container > div {
+        width: var(--wsem-pos-receipt-width) !important;
+        max-width: var(--wsem-pos-receipt-width) !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        padding-left: 1.5mm !important;
+        box-sizing: border-box !important;
+    }
+
+    .pos .pos-receipt,
+    .pos .pos-receipt div,
+    .pos .pos-receipt span,
+    .pos .pos-receipt p {
+        line-height: var(--wsem-pos-line-height) !important;
+    }
+  
+    .wsem-simplified-invoice-barcode img {
+        height: 24px;
+    }
+
+}
