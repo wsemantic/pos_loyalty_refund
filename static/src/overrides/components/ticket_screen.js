@@ -35,7 +35,11 @@ patch(TicketScreen.prototype, {
         if (!simplifiedInvoiceField) {
             return {
                 SIMPLIFIED_INVOICE: {
-                    repr: (order) => order.get_l10n_es_unique_id?.() || order.l10n_es_unique_id || "",
+                    // Coerce to String: fuzzyLookup -> unaccent() calls
+                    // str.replace(), which throws "str.replace is not a function"
+                    // when l10n_es_unique_id arrives as a number (e.g. the
+                    // in-progress refund order before its sequence string is set).
+                    repr: (order) => String(order.get_l10n_es_unique_id?.() || order.l10n_es_unique_id || ""),
                     displayName: _t("Simplified Invoice"),
                     modelField: "l10n_es_unique_id",
                 },
@@ -49,7 +53,7 @@ patch(TicketScreen.prototype, {
         return {
             [simplifiedKey]: {
                 ...simplifiedValue,
-                repr: (order) => order.get_l10n_es_unique_id?.() || order.l10n_es_unique_id || "",
+                repr: (order) => String(order.get_l10n_es_unique_id?.() || order.l10n_es_unique_id || ""),
                 displayName: simplifiedValue.displayName || _t("Simplified Invoice"),
                 modelField: "l10n_es_unique_id",
             },
